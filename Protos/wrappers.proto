@@ -1,0 +1,66 @@
+// Contains wrappers for server - display device communication
+
+syntax = "proto3";
+package naki3d.common.protocol;
+
+import "Protos/connection.proto";
+import "Protos/commands.proto";
+
+import "Protos/sensor.proto";
+import "Protos/camera.proto";
+import "Protos/keyboard.proto";
+import "Protos/mouse.proto";
+
+// Server -> Device
+// Message wrapper to allow identifying which message was sent using protobuf.
+message ServerMessage {
+  string connection_id = 1;
+  // 2 through 15 reserved
+  oneof message {
+      // connection.proto
+      EncryptionInfo encryption_info = 16;
+      // commands.proto
+      LoadPackage load_package = 17;
+      ClearPackage clear_package = 18;
+  }
+}
+
+// Device -> Server
+// Message wrapper, same as above.
+message DeviceMessage {
+  string connection_id = 1;
+  // 2 through 15 reserved
+  oneof message {
+    // connection.proto
+    DeviceDescriptor device_descriptor = 16;
+    Ping ping = 17;
+  }
+}
+
+// RasPi -> Device
+// Message wrapper, same as above.
+message SensorMessage {
+    string sensor_id = 1;
+    uint64 timestamp = 2; // Microseconds since startup (Camera timing is in microseconds, may as well keep it)
+    // 3 through 15 reserved
+    oneof data {
+        GestureData gesture = 16; // Keeping some space for extra info
+        HandMovementData hand_movement = 17;
+        BestUserChangedData best_user_changed = 18;
+        KeyboardUpdateData keyboard_update = 19;
+        MouseMoveData mouse_move = 20;
+        MouseButtonData mouse_button = 21;
+        MouseScrollData mouse_scroll = 22;
+    }
+}
+
+// Device -> RasPi
+// Message wrapper, same as above.
+message SensorControlMessage {
+    string hostname = 1;
+    // 2 through 15 reserved
+    oneof message {
+        SensorListRequest sensor_list = 16;
+        CECMessage cec_message = 17;
+    }
+}

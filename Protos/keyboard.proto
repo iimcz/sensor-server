@@ -1,0 +1,13 @@
+syntax = "proto3";
+package naki3d.common.protocol;
+
+enum KeyActionType {
+  KEY_UP = 0;
+  KEY_DOWN = 1;
+}
+
+// Raspi -> Device
+message KeyboardUpdateData {
+    KeyActionType type = 1;
+    int32 keycode = 2;
+}

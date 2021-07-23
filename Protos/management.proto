@@ -1,0 +1,23 @@
+syntax = "proto3";
+package naki3d.common.protocol;
+
+// We've covered there's going to be an optional management app, but not the capabilities, just a placeholder
+message ManagementRequest {
+    string connection_id = 1; // ID of target PC
+    enum ManagementType {
+        SHUTDOWN = 0;
+        SHUTDOWN_CLEAR = 1; // Also removes cached files
+        REBOOT = 2;
+        REBOOT_CLEAR = 3; // Also removes cached files
+        ALIVE_CHECK = 4; // Ping
+    }
+    ManagementType management_type = 2;
+}
+
+message ManagementResponse {
+    enum DeviceStatus {
+        OK = 0;
+        ERROR = 1;
+    }
+    DeviceStatus device_status = 1;
+}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+package naki3d.common.protocol;
+
+import "Protos/types.proto";
+
+enum GestureType {
+  GESTURE_WAVING = 0;
+  GESTURE_SWIPE_LEFT = 1;
+  GESTURE_SWIPE_RIGHT = 2;
+  GESTURE_SWIPE_UP = 3;
+  GESTURE_SWIPE_DOWN = 4;
+  GESTURE_PUSH = 5;
+}
+
+enum HandType {
+  HAND_LEFT = 0;
+  HAND_RIGHT = 1;
+}
+
+// Raspi -> Device
+message GestureData {
+    GestureType type = 1;
+    int32 user_id = 2;
+}
+
+message HandMovementData {
+    HandType hand = 1;
+    Vector3 proj_position = 2; // (x, y from 0.0 to 1.0, z is real)
+    bool open_hand = 3;
+    int32 user_id = 4;
+}
+
+message BestUserChangedData {
+    int32 best_user_id = 1;
+    int32 user_count = 2;
+}
+
+// Maybe add SkeletonData?
