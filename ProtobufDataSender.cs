@@ -60,7 +60,7 @@ namespace DepthCamera
         }
         private void SendMessage(SensorMessage sensorMessage)
         {
-            sensorMessage.WriteTo(_networkStream);
+            sensorMessage.WriteDelimitedTo(_networkStream);
             _networkStream.Flush();
         }
     }
