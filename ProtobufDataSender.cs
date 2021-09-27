@@ -6,7 +6,7 @@ using System.Net.Sockets;
 
 namespace DepthCamera
 {
-    class ProtobufDataSender : IDisposable
+    class ProtobufDataSender : DataSender
     {
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _networkStream;
