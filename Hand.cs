@@ -7,7 +7,6 @@ namespace DepthCamera{
         public Hand(float x, float y)
         {
             X = (int)(x * 10);
-            X /= 2;
             Y = (int)(y * 10);
         }
         public HandMovement CalculateMovement(Hand hand)

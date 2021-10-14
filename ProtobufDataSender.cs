@@ -1,7 +1,6 @@
 ﻿using Google.Protobuf;
 using Naki3D.Common.Protocol;
 using nuitrack;
-using System;
 using System.Net.Sockets;
 
 namespace DepthCamera

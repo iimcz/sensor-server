@@ -6,6 +6,7 @@ namespace DepthCamera
 {
     class GestureDetector
     {
+        private long _gestureDelay = 1000;
         private Dictionary<int, User> _users;
         public GestureDetector()
         {
@@ -18,7 +19,7 @@ namespace DepthCamera
             bool gestureDetected = false;
 
             User user;
-            if(!_users.TryGetValue(userId ,out user))
+            if(!_users.TryGetValue(userId, out user))
             {
                 user = new User();
                 _users.Add(userId, user);
@@ -34,10 +35,24 @@ namespace DepthCamera
             }
 
             Gesture gesture = new Gesture();
-            gesture.UserID = userId;
-            gesture.Type = gestureType;
+
+            if(gestureDetected)
+            {
+                long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                if(timestamp - user.LastGestureDetected <= _gestureDelay){
+                    outGesture = gesture;
+                    return false;
+                }
+                else{
+                    user.LastGestureDetected = timestamp;
+                    gesture.UserID = userId;
+                    gesture.Type = gestureType;
+                    outGesture = gesture;
+                    return true;
+                }
+            }
             outGesture = gesture;
-            return gestureDetected;
+            return false;
         }
         private bool DetectGesture(UserHand userHand, Hand hand, out GestureType gestureType)
         {
@@ -52,7 +67,6 @@ namespace DepthCamera
                 if(handMovement != HandMovement.None)
                 {
                     userHand.LastHandPosition = hand;
-
                     if(handMovement == userHand.HandMovement)
                     {
                         userHand.HandStepCounter++;
