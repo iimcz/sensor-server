@@ -25,21 +25,21 @@ namespace DepthCamera
             }
             try
             {
-                _handTracker = HandTracker.Create();
+                //_handTracker = HandTracker.Create();
                 _skeletonTracker = SkeletonTracker.Create();
             }
             catch
             {
                 Console.WriteLine("Cannot create Nuitrack module.");
             }
-            _handTracker.OnUpdateEvent += OnHandTrackerUpdate;
+            //_handTracker.OnUpdateEvent += OnHandTrackerUpdate;
             _skeletonTracker.OnSkeletonUpdateEvent += OnSkeletonUpdate;
         }
         public void Dispose()
         {
             try
             {
-                _handTracker.OnUpdateEvent -= OnHandTrackerUpdate;
+                //_handTracker.OnUpdateEvent -= OnHandTrackerUpdate;
                 _skeletonTracker.OnSkeletonUpdateEvent -= OnSkeletonUpdate;
                 Nuitrack.Release();
             }
@@ -77,7 +77,7 @@ namespace DepthCamera
                 {
                     HandContent hand = userHands.LeftHand.Value;
                     //_dataSender.SendHandMovement("1", userHands.UserId, handTrackerData.Timestamp, Naki3D.Common.Protocol.HandType.HandLeft, hand);
-                    //gestureDetected = _gestureDetector.Update(userHands.UserId, Naki3D.Common.Protocol.HandType.HandLeft, hand, out gesture);
+                    gestureDetected = _gestureDetector.Update(userHands.UserId, Naki3D.Common.Protocol.HandType.HandLeft, hand, out gesture);
                 }
                 if (userHands.RightHand != null)
                 {
@@ -99,10 +99,17 @@ namespace DepthCamera
                 Joint rightHand = skeleton.GetJoint(JointType.RightHand);
                 Joint leftHand = skeleton.GetJoint(JointType.LeftHand);
 
+                HandContent rightHandContent = new HandContent();
+                rightHandContent.X =  (int)(rightHand.Proj.X * 10);
+                rightHandContent.Y = (int)(rightHand.Proj.Y * 10);
+                _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent);
+
+                HandContent leftHandContent = new HandContent();
+                leftHandContent.X = (int)(leftHand.Proj.X * 10);
+                leftHandContent.Y = (int)(leftHand.Proj.Y * 10);
+                _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent);
+
                 if(rightHand.Confidence >= _minConfidence){ 
-                    HandContent rightHandContent = new HandContent();
-                    rightHandContent.X = rightHand.Proj.X;
-                    rightHandContent.Y = rightHand.Proj.Y;
                     gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent, out gesture);
                     if(gestureDetected)
                     {
@@ -111,9 +118,6 @@ namespace DepthCamera
                 }
 
                 if(leftHand.Confidence >= _minConfidence){
-                    HandContent leftHandContent = new HandContent();
-                    leftHandContent.X = leftHand.Proj.X;
-                    leftHandContent.Y = leftHand.Proj.Y;
                     gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandType.HandRight, leftHandContent, out gesture);
                     if(gestureDetected)
                     {

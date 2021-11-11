@@ -32,6 +32,7 @@ namespace DepthCamera
                 Timestamp = timestamp,
                 Gesture = gestureData
             };
+            System.Console.WriteLine(gesture.Type);
             SendMessage(message);
         }
         public void SendHandMovement(string sensorId, int userId, ulong timestamp, HandType handType, HandContent hand)

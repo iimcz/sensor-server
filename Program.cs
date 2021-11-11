@@ -9,7 +9,7 @@ namespace DepthCamera
         static void Main()
         {
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ConsoleEventHandler);
-            //_dataSender = new ProtobufDataSender("localhost", 5000);
+            //_dataSender = new ProtobufDataSender("192.168.23.58", 5000);
             _dataSender = new ConsoleDataSender();
             _cameraController = new(_dataSender);
             _cameraController.Start();
