@@ -8,9 +8,9 @@ namespace DepthCamera
         private bool _finished = false;
         private readonly DataSender _dataSender;
         private readonly GestureDetector _gestureDetector;
-        private readonly HandTracker _handTracker;
+        //private readonly HandTracker _handTracker;
         private readonly SkeletonTracker _skeletonTracker;
-        private readonly float _minConfidence = 0.5f;
+        private readonly float _minConfidence = 0.75f;
         public CameraController(DataSender DataSender)
         {
             _dataSender = DataSender;
@@ -84,7 +84,6 @@ namespace DepthCamera
                     HandContent hand = userHands.RightHand.Value;
                     //_dataSender.SendHandMovement("1", userHands.UserId, handTrackerData.Timestamp, Naki3D.Common.Protocol.HandType.HandRight, hand);
                     //gestureDetected = _gestureDetector.Update(userHands.UserId, Naki3D.Common.Protocol.HandType.HandRight, hand, out gesture);
-                    //Console.WriteLine(hand.YReal);
                 }
                 if(gestureDetected)
                 {
@@ -100,16 +99,17 @@ namespace DepthCamera
                 Joint leftHand = skeleton.GetJoint(JointType.LeftHand);
 
                 HandContent rightHandContent = new HandContent();
-                rightHandContent.X =  (int)(rightHand.Proj.X * 10);
-                rightHandContent.Y = (int)(rightHand.Proj.Y * 10);
-                _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent);
+                rightHandContent.X = rightHand.Proj.X;
+                rightHandContent.Y = rightHand.Proj.Y;
+                //_dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent);
 
                 HandContent leftHandContent = new HandContent();
-                leftHandContent.X = (int)(leftHand.Proj.X * 10);
-                leftHandContent.Y = (int)(leftHand.Proj.Y * 10);
-                _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent);
+                leftHandContent.X = leftHand.Proj.X ;
+                leftHandContent.Y = leftHand.Proj.Y;
+                //_dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent);
 
-                if(rightHand.Confidence >= _minConfidence){ 
+                if(rightHand.Confidence >= _minConfidence){
+                    //Console.WriteLine($"[{rightHand.Proj.X}, {rightHand.Proj.Y}]");
                     gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent, out gesture);
                     if(gestureDetected)
                     {

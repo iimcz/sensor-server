@@ -18,41 +18,57 @@ namespace DepthCamera
             Hand hand = new Hand(handContent.X, handContent.Y);
             GestureType gestureType;
             bool gestureDetected = false;
-            //Console.WriteLine($"[{hand.X}, {hand.Y}]");
 
-            User user;
-            if(!_users.TryGetValue(userId, out user))
+            if(!_users.TryGetValue(userId, out User user))
             {
                 user = new User();
                 _users.Add(userId, user);
             }
 
+            Gesture gesture = new Gesture();
+
             if(handType == Naki3D.Common.Protocol.HandType.HandRight)
             {
+                //Console.WriteLine($"[{hand.X}, {hand.Y}]");
                 gestureDetected = DetectGesture(user.RightHand, hand, out gestureType);
+
+                if(gestureDetected)
+                {
+                    long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    if(timestamp - user.LastGestureDetected <= _gestureDelay){
+                        outGesture = gesture;
+                        return false;
+                    }
+                    else{
+                        user.LastGestureDetected = timestamp;
+                        gesture.UserID = userId;
+                        gesture.Type = gestureType;
+                        outGesture = gesture;
+                        return true;
+                    }
+                }
             }
             else
             {
                 gestureDetected = DetectGesture(user.LeftHand, hand, out gestureType);
-            }
 
-            Gesture gesture = new Gesture();
-
-            if(gestureDetected)
-            {
-                long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                if(timestamp - user.LastGestureDetected <= _gestureDelay){
-                    outGesture = gesture;
-                    return false;
-                }
-                else{
-                    user.LastGestureDetected = timestamp;
-                    gesture.UserID = userId;
-                    gesture.Type = gestureType;
-                    outGesture = gesture;
-                    return true;
+                if(gestureDetected)
+                {
+                    long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    if(timestamp - user.LastGestureDetected <= _gestureDelay){
+                        outGesture = gesture;
+                        return false;
+                    }
+                    else{
+                        user.LastGestureDetected = timestamp;
+                        gesture.UserID = userId;
+                        gesture.Type = gestureType;
+                        outGesture = gesture;
+                        return true;
+                    }
                 }
             }
+
             outGesture = gesture;
             return false;
         }
