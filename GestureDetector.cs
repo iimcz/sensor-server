@@ -9,10 +9,12 @@ namespace DepthCamera
         private readonly int _gestureDelay = 1000;
         private readonly int _gestureLength = 3;
         private Dictionary<int, User> _users;
+
         public GestureDetector()
         {
             _users = new Dictionary<int, User>();
         }
+
         public bool Update(int userId, Naki3D.Common.Protocol.HandType handType, HandContent handContent, out Gesture outGesture)
         {
             Hand hand = new Hand(handContent.X, handContent.Y);
@@ -29,12 +31,13 @@ namespace DepthCamera
 
             if(handType == Naki3D.Common.Protocol.HandType.HandRight)
             {
-                //Console.WriteLine($"[{hand.X}, {hand.Y}]");
+                //Console.WriteLine($"[{hand.RealX}, {hand.RealY}]");
                 gestureDetected = DetectGesture(user.RightHand, hand, out gestureType);
 
                 if(gestureDetected)
                 {
                     long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
                     if(timestamp - user.LastGestureDetected <= _gestureDelay){
                         outGesture = gesture;
                         return false;
@@ -55,6 +58,7 @@ namespace DepthCamera
                 if(gestureDetected)
                 {
                     long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
                     if(timestamp - user.LastGestureDetected <= _gestureDelay){
                         outGesture = gesture;
                         return false;
@@ -85,6 +89,7 @@ namespace DepthCamera
                 if(handMovement != HandMovement.None)
                 {
                     userHand.LastHandPosition = hand;
+
                     if(handMovement == userHand.HandMovement)
                     {
                         userHand.HandStepCounter++;
@@ -93,17 +98,21 @@ namespace DepthCamera
                         {
                             userHand.HandMovement = HandMovement.None;
                             userHand.HandStepCounter = 0;
+
                             switch(handMovement)
                             {
                                 case HandMovement.Left:
                                     gestureType = GestureType.GestureSwipeLeft;
                                     return true;
+
                                 case HandMovement.Right:
                                     gestureType = GestureType.GestureSwipeRight;
                                     return true;
+
                                 case HandMovement.Up:
                                     gestureType = GestureType.GestureSwipeUp;
                                     return true;
+                                    
                                 case HandMovement.Down:
                                     gestureType = GestureType.GestureSwipeDown;
                                     return true;
@@ -117,6 +126,7 @@ namespace DepthCamera
                     }
                 }
             }
+
             gestureType = GestureType.GestureSwipeLeft;
             return false;
         }
