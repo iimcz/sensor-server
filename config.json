@@ -1,0 +1,17 @@
+{
+    "DataSenderConfiguration": {
+        "DataSenderType": "console",
+        "Host": "localhost",
+        "Port": 5000
+    },
+    "DepthCameraConfiguration": {
+        "BackgroundMode": "static_first_frame",
+        "CalibrationFramesNumber": 30,
+        "GestureDelay": 1000,
+        "GestureLength": 2,
+        "JointMinConfidence": 0.75,
+        "HorizontalGridSize": 0.1,
+        "VerticalGridSize": 0.14
+    }
+}
+  

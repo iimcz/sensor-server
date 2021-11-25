@@ -1,4 +1,5 @@
-﻿using nuitrack;
+﻿using DepthCamera.Configuration;
+using nuitrack;
 using System;
 
 namespace DepthCamera
@@ -9,31 +10,44 @@ namespace DepthCamera
         private readonly DataSender _dataSender;
         private readonly GestureDetector _gestureDetector;
         private readonly SkeletonTracker _skeletonTracker;
-        private readonly float _minConfidence = 0.75f;
+        private readonly float _minConfidence;
 
-        public CameraController(DataSender DataSender)
+        public CameraController(DataSender DataSender, DepthCameraConfiguration config)
         {
+            _minConfidence = config.JointMinConfidence;
             _dataSender = DataSender;
-            _gestureDetector = new GestureDetector();
+            _gestureDetector = new GestureDetector(config);
 
             try
             {
                 Nuitrack.Init();
-                Console.WriteLine("Nuitrack initialized.");
+                if (config.BackgroundMode == "dynamic")
+                {
+                    Nuitrack.SetConfigValue("Segmentation.Background.BackgroundMode", "dynamic");
+                }
+                else
+                {
+                    Nuitrack.SetConfigValue("Segmentation.Background.BackgroundMode", "static_first_frame");
+                    Nuitrack.SetConfigValue("Segmentation.Background.CalibrationFramesNumber", config.CalibrationFramesNumber.ToString());
+                }
+                
+                Console.Write("Nuitrack initialized, ");
+                Console.Write($"BackgroundMode: {Nuitrack.GetConfigValue("Segmentation.Background.BackgroundMode")}, ");
+                Console.WriteLine($"CalibrationFramesNumber: {Nuitrack.GetConfigValue("Segmentation.Background.CalibrationFramesNumber")}");
             }
             catch
             {
-                Console.WriteLine("Cannot initialize Nuitrack.");
+                Console.WriteLine("Cannot initialize Nuitrack");
             }
 
             try
             {
                 _skeletonTracker = SkeletonTracker.Create();
-                Console.WriteLine("Nuitrack SkeletonTracker modul created.");
+                Console.WriteLine("Nuitrack SkeletonTracker modul created");
             }
             catch
             {
-                Console.WriteLine("Cannot create Nuitrack SkeletonTracker module.");
+                Console.WriteLine("Cannot create Nuitrack SkeletonTracker module");
             }
 
             _skeletonTracker.OnSkeletonUpdateEvent += OnSkeletonUpdate;
@@ -44,11 +58,11 @@ namespace DepthCamera
             {
                 _skeletonTracker.OnSkeletonUpdateEvent -= OnSkeletonUpdate;
                 Nuitrack.Release();
-                Console.WriteLine("Nuitrack released.");
+                Console.WriteLine("Nuitrack released");
             }
             catch
             {
-                Console.WriteLine("Nuitrack release failed.");
+                Console.WriteLine("Nuitrack release failed");
             }
         }
         public void Start()
@@ -56,11 +70,11 @@ namespace DepthCamera
             try
             {
                 Nuitrack.Run();
-                Console.WriteLine("Nuitrack started.");
+                Console.WriteLine("Nuitrack started");
             }
             catch
             {
-                Console.WriteLine("Cannot start Nuitrack.");
+                Console.WriteLine("Cannot start Nuitrack");
             }
 
             while (!_finished)

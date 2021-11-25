@@ -5,12 +5,14 @@ namespace DepthCamera{
     {
         public float RealX;
         public float RealY;
-        private static readonly float _horizontalStepSize = 0.1f;
-        private static readonly float _verticalStepSize = 0.1f;
-        public Hand(float x, float y)
+        private readonly float _horizontalStepSize;
+        private readonly float _verticalStepSize;
+        public Hand(float x, float y, float horizontalStepSize, float verticalStepSize)
         {
             RealX = x;
             RealY = y;
+            _horizontalStepSize = horizontalStepSize;
+            _verticalStepSize = verticalStepSize;
         }
 
         public HandMovement CalculateMovement(Hand hand){
@@ -18,7 +20,7 @@ namespace DepthCamera{
             float verticalMovement = RealY - hand.RealY;
 
             HandMovement res = HandMovement.None;
-
+            
             if(Math.Abs(horizontalMovement) > _horizontalStepSize && Math.Abs(verticalMovement) > _verticalStepSize)
             {
                 if (Math.Abs(horizontalMovement) > Math.Abs(verticalMovement))

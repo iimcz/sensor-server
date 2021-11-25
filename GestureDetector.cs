@@ -1,23 +1,28 @@
 using System.Collections.Generic;
 using nuitrack;
 using System;
+using DepthCamera.Configuration;
 
 namespace DepthCamera
 {
     class GestureDetector
     {
-        private readonly int _gestureDelay = 1000;
-        private readonly int _gestureLength = 3;
+        private readonly int _gestureDelay;
+        private readonly int _gestureLength;
         private Dictionary<int, User> _users;
+        private readonly DepthCameraConfiguration _config;
 
-        public GestureDetector()
+        public GestureDetector(DepthCameraConfiguration config)
         {
+            _config = config;
+            _gestureDelay = _config.GestureDelay;
+            _gestureLength = _config.GestureLength;
             _users = new Dictionary<int, User>();
         }
 
         public bool Update(int userId, Naki3D.Common.Protocol.HandType handType, HandContent handContent, out Gesture outGesture)
         {
-            Hand hand = new Hand(handContent.X, handContent.Y);
+            Hand hand = new Hand(handContent.X, handContent.Y, _config.HorizontalGridSize, _config.VerticalGridSize);
             GestureType gestureType;
             bool gestureDetected = false;
 
