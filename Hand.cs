@@ -1,6 +1,9 @@
 using System;
 
 namespace DepthCamera{
+    /// <summary>
+    /// Information about hand position (coordinates)
+    /// </summary>
     class Hand
     {
         public float RealX;
@@ -15,6 +18,11 @@ namespace DepthCamera{
             _verticalStepSize = verticalStepSize;
         }
 
+        /// <summary>
+        /// Calculate direction of hand movement
+        /// </summary>
+        /// <param name="hand">New hand position</param>
+        /// <returns>Direction of hand movement (left, right, up, down, none)</returns>
         public HandMovement CalculateMovement(Hand hand){
             float horizontalMovement = RealX - hand.RealX;
             float verticalMovement = RealY - hand.RealY;

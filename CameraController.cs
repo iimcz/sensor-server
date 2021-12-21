@@ -4,6 +4,9 @@ using System;
 
 namespace DepthCamera
 {
+    /// <summary>
+    /// Controller for depth camera
+    /// </summary>
     class CameraController : IDisposable
     {
         private bool _finished = false;
@@ -11,7 +14,12 @@ namespace DepthCamera
         private readonly GestureDetector _gestureDetector;
         private readonly SkeletonTracker _skeletonTracker;
         private readonly float _minConfidence;
-
+        
+        /// <summary>
+        /// Setup depth camera
+        /// </summary>
+        /// <param name="DataSender">Data sender configuration</param>
+        /// <param name="config">Cammera configuration</param>
         public CameraController(DataSender DataSender, DepthCameraConfiguration config)
         {
             _minConfidence = config.JointMinConfidence;
@@ -65,6 +73,10 @@ namespace DepthCamera
                 Console.WriteLine("Nuitrack release failed");
             }
         }
+
+        /// <summary>
+        /// Starts gesture detection
+        /// </summary>
         public void Start()
         {
             try
@@ -82,11 +94,20 @@ namespace DepthCamera
                 Nuitrack.WaitUpdate(_skeletonTracker);
             }
         }
+
+        /// <summary>
+        /// Stops gesture detection
+        /// </summary>
         public void Stop()
         {
             _finished = true;
         }
 
+
+        /// <summary>
+        /// Handle skeleton update and send data abou detected gestures
+        /// </summary>
+        /// <param name="skeletonData">New skeleton data</param>
         private void OnSkeletonUpdate(SkeletonData skeletonData){
             bool gestureDetected = false;
             Gesture gesture = new Gesture();
@@ -103,7 +124,7 @@ namespace DepthCamera
                 leftHandContent.Y = leftHand.Proj.Y;
 
                 if(rightHand.Confidence >= _minConfidence){
-                    //_dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent);
+                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent);
                     gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent, out gesture);
 
                     if(gestureDetected)
@@ -113,7 +134,7 @@ namespace DepthCamera
                 }
 
                 if(leftHand.Confidence >= _minConfidence){
-                    //_dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent);
+                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent);
                     gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent, out gesture);
                     
                     if(gestureDetected)

@@ -9,6 +9,10 @@ namespace DepthCamera
     {
         private static DataSender _dataSender;
         private static CameraController _cameraController;
+
+        /// <summary>
+        /// Read configuration file, initialize data sender and depth camera controller
+        /// </summary>
         static void Main()
         {
             AppConfiguration config = new();
@@ -37,6 +41,10 @@ namespace DepthCamera
             _cameraController = new(_dataSender, config.DepthCameraConfiguration);
             _cameraController.Start();
         }
+
+        /// <summary>
+        /// Added EventHandler for stoping program
+        /// </summary>
         public static void ConsoleEventHandler(object sender, ConsoleCancelEventArgs args)
         {
             if (args.SpecialKey == ConsoleSpecialKey.ControlC)

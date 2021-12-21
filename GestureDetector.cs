@@ -5,6 +5,9 @@ using DepthCamera.Configuration;
 
 namespace DepthCamera
 {
+    /// <summary>
+    /// Handle gesture detection
+    /// </summary>
     class GestureDetector
     {
         private readonly int _gestureDelay;
@@ -20,6 +23,14 @@ namespace DepthCamera
             _users = new Dictionary<int, User>();
         }
 
+        /// <summary>
+        /// Update gesture detection whan hand movement is detected
+        /// </summary>
+        /// <param name="userId">ID of the user</param>
+        /// <param name="handType">Hand type (left, right)</param>
+        /// <param name="handContent">Information abou new hand position</param>
+        /// <param name="outGesture">Output paremeter will contain geture type if gesture is detected</param>
+        /// <returns>True if gesture was detected, False otherwise</returns>
         public bool Update(int userId, Naki3D.Common.Protocol.HandType handType, HandContent handContent, out Gesture outGesture)
         {
             Hand hand = new Hand(handContent.X, handContent.Y, _config.HorizontalGridSize, _config.VerticalGridSize);
@@ -81,6 +92,14 @@ namespace DepthCamera
             outGesture = gesture;
             return false;
         }
+
+        /// <summary>
+        /// Detect gestures
+        /// </summary>
+        /// <param name="userHand">Information abou hand position</param>
+        /// <param name="hand">New hand position</param>
+        /// <param name="gestureType">Output paremeter will contain geture type if gesture is detected</param>
+        /// <returns>True if gesture was detected, False otherwise</returns>
         private bool DetectGesture(UserHand userHand, Hand hand, out GestureType gestureType)
         {
             if(userHand.LastHandPosition == null)

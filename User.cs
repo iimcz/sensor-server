@@ -1,6 +1,9 @@
 using System;
 
 namespace DepthCamera{
+    /// <summary>
+    /// Information about user (informations abou left and right hand, time whan last gesture was detected)
+    /// </summary>
     class User{
         public UserHand LeftHand;
         public UserHand RightHand;

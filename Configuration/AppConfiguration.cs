@@ -7,7 +7,7 @@ namespace DepthCamera.Configuration
         public AppConfiguration()
         {
             DataSenderConfiguration = new DataSenderConfiguration();
-
+            DepthCameraConfiguration = new DepthCameraConfiguration();
         }
     }
 }
