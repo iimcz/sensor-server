@@ -1,4 +1,4 @@
-namespace DepthCamera.Configuration
+namespace SensorServer.Configuration
 {
     public class DepthCameraConfiguration
     {

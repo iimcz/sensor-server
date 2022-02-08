@@ -1,6 +1,5 @@
 {
-    "DataSenderConfiguration": {
-        "DataSenderType": "console",
+    "CommunicationConfiguration": {
         "Host": "localhost",
         "Port": 5000
     },
@@ -12,6 +11,8 @@
         "JointMinConfidence": 0.75,
         "HorizontalGridSize": 0.1,
         "VerticalGridSize": 0.14
-    }
+    },
+    "ProjectorControl": true,
+    "DepthCamera": true
 }
   

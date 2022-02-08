@@ -1,8 +1,8 @@
-﻿using DepthCamera.Configuration;
+﻿using SensorServer.Configuration;
 using nuitrack;
 using System;
 
-namespace DepthCamera
+namespace SensorServer.DepthCamera
 {
     /// <summary>
     /// Controller for depth camera
@@ -10,7 +10,7 @@ namespace DepthCamera
     class CameraController : IDisposable
     {
         private bool _finished = false;
-        private readonly DataSender _dataSender;
+        private readonly ProtobufCommunication _dataSender;
         private readonly GestureDetector _gestureDetector;
         private readonly SkeletonTracker _skeletonTracker;
         private readonly float _minConfidence;
@@ -20,7 +20,7 @@ namespace DepthCamera
         /// </summary>
         /// <param name="DataSender">Data sender configuration</param>
         /// <param name="config">Cammera configuration</param>
-        public CameraController(DataSender DataSender, DepthCameraConfiguration config)
+        public CameraController(ProtobufCommunication DataSender, DepthCameraConfiguration config)
         {
             _minConfidence = config.JointMinConfidence;
             _dataSender = DataSender;

@@ -1,6 +1,7 @@
 using System;
 
-namespace DepthCamera{
+namespace SensorServer.DepthCamera
+{
     /// <summary>
     /// Information about hand position (coordinates)
     /// </summary>
@@ -10,6 +11,7 @@ namespace DepthCamera{
         public float RealY;
         private readonly float _horizontalStepSize;
         private readonly float _verticalStepSize;
+
         public Hand(float x, float y, float horizontalStepSize, float verticalStepSize)
         {
             RealX = x;

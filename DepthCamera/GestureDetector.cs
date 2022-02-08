@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using nuitrack;
 using System;
-using DepthCamera.Configuration;
+using SensorServer.Configuration;
 
-namespace DepthCamera
+namespace SensorServer.DepthCamera
 {
     /// <summary>
     /// Handle gesture detection

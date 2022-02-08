@@ -1,12 +1,15 @@
-namespace DepthCamera.Configuration
+namespace SensorServer.Configuration
 {
     public class AppConfiguration
     {
-        public DataSenderConfiguration DataSenderConfiguration { get; set; }
+        public CommunicationConfiguration CommunicationConfiguration { get; set; }
         public DepthCameraConfiguration DepthCameraConfiguration { get; set; }
+        public bool ProjectorControl { get; set; } = false; 
+        public bool DepthCamera { get; set; } = false;
+
         public AppConfiguration()
         {
-            DataSenderConfiguration = new DataSenderConfiguration();
+            CommunicationConfiguration = new CommunicationConfiguration();
             DepthCameraConfiguration = new DepthCameraConfiguration();
         }
     }

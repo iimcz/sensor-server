@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
-using DepthCamera.Configuration;
+using System.Threading;
 using Newtonsoft.Json;
+using SensorServer.Configuration;
+using SensorServer.DepthCamera;
 
-namespace DepthCamera
+namespace SensorServer
 {
     class Program
     {
-        private static DataSender _dataSender;
         private static CameraController _cameraController;
+        private static ProtobufCommunication _protobufCommunication;
 
         /// <summary>
         /// Read configuration file, initialize data sender and depth camera controller
@@ -28,18 +30,20 @@ namespace DepthCamera
             }
 
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ConsoleEventHandler);
-            
-            if (config.DataSenderConfiguration.DataSenderType == "console")
+
+            _protobufCommunication = new(config.CommunicationConfiguration.Host, config.CommunicationConfiguration.Port);
+
+            if (config.ProjectorControl)
             {
-                _dataSender = new ConsoleDataSender();
+                Thread readThread = new(_protobufCommunication.Start);
+                readThread.Start();
             }
-            else
+
+            if (config.DepthCamera)
             {
-                _dataSender = new ProtobufDataSender(config.DataSenderConfiguration.Host, config.DataSenderConfiguration.Port);
+                _cameraController = new(_protobufCommunication, config.DepthCameraConfiguration);
+                _cameraController.Start();
             }
-            
-            _cameraController = new(_dataSender, config.DepthCameraConfiguration);
-            _cameraController.Start();
         }
 
         /// <summary>
@@ -51,9 +55,9 @@ namespace DepthCamera
             {
                 _cameraController.Stop();
                 _cameraController.Dispose();
-                _dataSender.Dispose();
+                _protobufCommunication.Stop();
+                _protobufCommunication.Dispose();
             }
         }
     }
 }
-    

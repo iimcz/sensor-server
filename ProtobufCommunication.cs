@@ -1,19 +1,37 @@
 ﻿using Google.Protobuf;
 using Naki3D.Common.Protocol;
 using nuitrack;
+using SensorServer.ProjectorControl;
+using System;
 using System.Net.Sockets;
 
-namespace DepthCamera
+namespace SensorServer
 {
-    class ProtobufDataSender : DataSender
+    class ProtobufCommunication
     {
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _networkStream;
 
-        public ProtobufDataSender(string ip, int port)
+        private readonly IProjectorController _projectorController;
+        private bool _finished = false;
+
+        public ProtobufCommunication(string ip, int port)
         {
-            _tcpClient = new TcpClient(ip, port);
-            _networkStream = _tcpClient.GetStream();
+            while (true)
+            {
+                try
+                {
+                    _tcpClient = new TcpClient(ip, port);
+                    _networkStream = _tcpClient.GetStream();
+                    _projectorController = new ProjectorController();
+                    break;
+                }
+                catch(System.Exception e)
+                {
+                    Console.WriteLine("Connection failed. Retry in 1s.");
+                }
+                System.Threading.Thread.Sleep(1000);
+            }
         }
 
         public void Dispose()
@@ -80,6 +98,38 @@ namespace DepthCamera
         {
             sensorMessage.WriteDelimitedTo(_networkStream);
             _networkStream.Flush();
+        }
+
+        public void Start()
+        {
+            while (!_finished)
+            {
+                try
+                {
+                    SensorControlMessage message = SensorControlMessage.Parser.ParseDelimitedFrom(_networkStream);
+                    Console.WriteLine(message.CecMessage);
+
+                    switch (message.CecMessage.Action)
+                    {
+                        case CECAction.PowerOn:
+                            _projectorController.PowerOn();
+                            break;
+
+                        case CECAction.PowerOff:
+                            _projectorController.PowerOff();
+                            break;
+                    }
+                }
+                catch(System.Exception e)
+                {
+                    Console.WriteLine("Invalid message");
+                }
+            }
+        }
+
+        public void Stop()
+        {
+            _finished = true;
         }
     }
 }
