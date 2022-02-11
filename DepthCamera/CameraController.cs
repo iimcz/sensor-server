@@ -51,15 +51,15 @@ namespace SensorServer.DepthCamera
             try
             {
                 _skeletonTracker = SkeletonTracker.Create();
+                _skeletonTracker.OnSkeletonUpdateEvent += OnSkeletonUpdate;
                 Console.WriteLine("Nuitrack SkeletonTracker modul created");
             }
             catch
             {
                 Console.WriteLine("Cannot create Nuitrack SkeletonTracker module");
             }
-
-            _skeletonTracker.OnSkeletonUpdateEvent += OnSkeletonUpdate;
         }
+
         public void Dispose()
         {
             try

@@ -9,8 +9,10 @@ namespace SensorServer
 {
     class Program
     {
-        private static CameraController _cameraController;
-        private static ProtobufCommunication _protobufCommunication;
+        private static CameraController _cameraController = null;
+        private static ProtobufCommunication _protobufCommunication = null;
+
+        private static bool _finished = false;
 
         /// <summary>
         /// Read configuration file, initialize data sender and depth camera controller
@@ -33,16 +35,47 @@ namespace SensorServer
 
             _protobufCommunication = new(config.CommunicationConfiguration.Host, config.CommunicationConfiguration.Port);
 
-            if (config.ProjectorControl)
+            while (true)
             {
-                Thread readThread = new(_protobufCommunication.Start);
-                readThread.Start();
-            }
+                if (_finished) break;
 
-            if (config.DepthCamera)
-            {
-                _cameraController = new(_protobufCommunication, config.DepthCameraConfiguration);
-                _cameraController.Start();
+                _protobufCommunication.Connect();
+
+                Thread readThread = null;
+
+                if (config.ProjectorControl)
+                {
+                    readThread = new(_protobufCommunication.Start);
+                    readThread.Start();
+                }
+
+                if (config.DepthCamera)
+                {
+                    _cameraController = new(_protobufCommunication, config.DepthCameraConfiguration);
+                    try
+                    {
+                        _cameraController.Start();
+                    }
+                    catch(Exception e)
+                    {
+                        if (!_protobufCommunication.IsConnected())
+                        {
+                            if(readThread != null)
+                            {
+                                _protobufCommunication.Stop();
+                                _protobufCommunication.Dispose();
+                            }
+                            continue;
+                        }
+                        else
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                    }
+                    
+                }
+
+                if (readThread != null) readThread.Join();
             }
         }
 
@@ -53,10 +86,14 @@ namespace SensorServer
         {
             if (args.SpecialKey == ConsoleSpecialKey.ControlC)
             {
-                _cameraController.Stop();
-                _cameraController.Dispose();
+                _finished = true;
                 _protobufCommunication.Stop();
                 _protobufCommunication.Dispose();
+                if (_cameraController != null)
+                {
+                    _cameraController.Stop();
+                    _cameraController.Dispose();
+                }
             }
         }
     }

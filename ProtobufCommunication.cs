@@ -9,24 +9,35 @@ namespace SensorServer
 {
     class ProtobufCommunication
     {
-        private readonly TcpClient _tcpClient;
-        private readonly NetworkStream _networkStream;
+        private readonly string _ip;
+        private readonly int _port;
 
-        private readonly IProjectorController _projectorController;
+        private TcpClient _tcpClient;
+        private NetworkStream _networkStream;
+
+        private IProjectorController _projectorController;
         private bool _finished = false;
 
         public ProtobufCommunication(string ip, int port)
         {
+            _ip = ip;
+            _port = port;
+        }
+
+        public void Connect()
+        {
             while (true)
             {
+                if (_finished) break;
+
                 try
                 {
-                    _tcpClient = new TcpClient(ip, port);
+                    _tcpClient = new TcpClient(_ip, _port);
                     _networkStream = _tcpClient.GetStream();
                     _projectorController = new ProjectorController();
                     break;
                 }
-                catch(System.Exception e)
+                catch (System.Exception e)
                 {
                     Console.WriteLine("Connection failed. Retry in 1s.");
                 }
@@ -36,8 +47,8 @@ namespace SensorServer
 
         public void Dispose()
         {
-            _networkStream.Close();
-            _tcpClient.Close();
+            if (_networkStream != null) _networkStream.Close();
+            if ( _tcpClient != null) _tcpClient.Close();
         }
 
         /// <summary>
@@ -106,6 +117,11 @@ namespace SensorServer
             {
                 try
                 {
+                    if (!_tcpClient.Connected)
+                    {
+                        break;
+                    }
+
                     SensorControlMessage message = SensorControlMessage.Parser.ParseDelimitedFrom(_networkStream);
                     Console.WriteLine(message.CecMessage);
 
@@ -130,6 +146,11 @@ namespace SensorServer
         public void Stop()
         {
             _finished = true;
+        }
+
+        public bool IsConnected()
+        {
+            return _tcpClient.Connected;
         }
     }
 }
