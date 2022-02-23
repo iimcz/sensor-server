@@ -1,0 +1,14 @@
+[Unit]
+Description=sensor-server
+
+[Service]
+WorkingDirectory=/home/pi/sensor-server/bin/Debug/net5.0/publish
+ExecStart=/home/pi/.dotnet/dotnet /home/pi/sensor-server/bin/Debug/net5.0/publish/SensorServer.dll
+KillSignal=SIGINT
+SyslogIdentifier=sensor-server
+User=pi
+Environment=PROTOBUF_PROTOC=/usr/bin/protoc
+
+[Install]
+WantedBy=multi-user.target
+
