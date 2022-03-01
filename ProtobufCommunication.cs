@@ -138,7 +138,8 @@ namespace SensorServer
                 }
                 catch(System.Exception e)
                 {
-                    Console.WriteLine("Invalid message");
+                    Console.WriteLine("Invalid message. Assuming disconnected socket...");
+                    break;
                 }
             }
         }
