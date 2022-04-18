@@ -12,7 +12,12 @@
         "HorizontalGridSize": 0.1,
         "VerticalGridSize": 0.14
     },
-    "ProjectorControl": true,
-    "DepthCamera": true
+    "ProjectorControl": 2,
+    "DepthCamera": true,
+    "PjlinkConfiguration": {
+        "Hosts": [
+            "127.0.0.1"
+        ]
+    }
 }
   

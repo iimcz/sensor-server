@@ -18,6 +18,8 @@ namespace SensorServer
         private IProjectorController _projectorController;
         private bool _finished = false;
 
+        public IProjectorController ProjectorController { get => _projectorController; set => _projectorController = value; }
+
         public ProtobufCommunication(string ip, int port)
         {
             _ip = ip;
@@ -34,12 +36,11 @@ namespace SensorServer
                 {
                     _tcpClient = new TcpClient(_ip, _port);
                     _networkStream = _tcpClient.GetStream();
-                    _projectorController = new ProjectorController();
                     break;
                 }
                 catch (System.Exception e)
                 {
-                    Console.WriteLine("Connection failed. Retry in 1s.");
+                    Console.WriteLine($"Connection failed: {e.Message}\nRetry in 1s.");
                 }
                 System.Threading.Thread.Sleep(1000);
             }
@@ -128,17 +129,17 @@ namespace SensorServer
                     switch (message.CecMessage.Action)
                     {
                         case CECAction.PowerOn:
-                            _projectorController.PowerOn();
+                            _projectorController?.PowerOn();
                             break;
 
                         case CECAction.PowerOff:
-                            _projectorController.PowerOff();
+                            _projectorController?.PowerOff();
                             break;
                     }
                 }
                 catch(System.Exception e)
                 {
-                    Console.WriteLine("Invalid message. Assuming disconnected socket...");
+                    Console.WriteLine($"Invalid message: {e.Message}\n Assuming disconnected socket...");
                     break;
                 }
             }

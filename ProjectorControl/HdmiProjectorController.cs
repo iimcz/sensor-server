@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace SensorServer.ProjectorControl
 {
-    class ProjectorController : IProjectorController
+    class HdmiProjectorController : IProjectorController
     {
         public void PowerOff()
         {

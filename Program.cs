@@ -4,6 +4,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using SensorServer.Configuration;
 using SensorServer.DepthCamera;
+using SensorServer.ProjectorControl;
 
 namespace SensorServer
 {
@@ -43,7 +44,17 @@ namespace SensorServer
 
                 Thread readThread = null;
 
-                if (config.ProjectorControl)
+                switch (config.ProjectorControl)
+                {
+                    case ProjectorControlType.HdmiCec:
+                        _protobufCommunication.ProjectorController = new HdmiProjectorController();
+                        break;
+                    case ProjectorControlType.Pjlink:
+                        _protobufCommunication.ProjectorController = new PjlinkProjectorController(config.PjlinkConfiguration);
+                        break;
+
+                }
+                if (config.ProjectorControl != ProjectorControlType.None)
                 {
                     readThread = new(_protobufCommunication.Start);
                     readThread.Start();
