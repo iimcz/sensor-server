@@ -4,5 +4,6 @@ namespace SensorServer.Configuration
     {
         public string Host { get; set; } = "localhost";
         public int Port { get; set; } = 5000;
+        public int ManagementPort { get; set; } = 5001;
     }
 }

@@ -14,6 +14,7 @@ namespace SensorServer.Configuration
         public ProjectorControlType ProjectorControl { get; set; } = ProjectorControlType.None; 
         public PjlinkConfiguration PjlinkConfiguration { get; set; }
         public bool DepthCamera { get; set; } = false;
+        public UdpCrestronAdapterConfiguration UdpCrestronAdapterConfiguration { get; set; }
 
         public AppConfiguration()
         {

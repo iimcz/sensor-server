@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using SensorServer.Configuration;
 using SensorServer.DepthCamera;
 using SensorServer.ProjectorControl;
+using SensorServer.RemoteManagement;
 
 namespace SensorServer
 {
@@ -12,6 +13,7 @@ namespace SensorServer
     {
         private static CameraController _cameraController = null;
         private static ProtobufCommunication _protobufCommunication = null;
+        private static UdpCrestronAdapter _udpCrestronAdapter = null;
 
         private static bool _finished = false;
 
@@ -36,6 +38,8 @@ namespace SensorServer
 
             _protobufCommunication = new(config.CommunicationConfiguration.Host, config.CommunicationConfiguration.Port);
 
+            if (config.UdpCrestronAdapterConfiguration?.Enabled ?? false) _udpCrestronAdapter = new(config);
+
             while (true)
             {
                 if (_finished) break;
@@ -43,6 +47,12 @@ namespace SensorServer
                 _protobufCommunication.Connect();
 
                 Thread readThread = null;
+                Thread crestronAdapterThread = null;
+                if (_udpCrestronAdapter != null)
+                {
+                    crestronAdapterThread = new(_udpCrestronAdapter.Listen);
+                    crestronAdapterThread.Start();
+                }
 
                 switch (config.ProjectorControl)
                 {
@@ -87,6 +97,7 @@ namespace SensorServer
                 }
 
                 if (readThread != null) readThread.Join();
+                if (crestronAdapterThread != null) crestronAdapterThread.Join();
             }
         }
 
@@ -104,6 +115,11 @@ namespace SensorServer
                 {
                     _cameraController.Stop();
                     _cameraController.Dispose();
+                }
+
+                if (_udpCrestronAdapter != null)
+                {
+                    _udpCrestronAdapter.Stop();
                 }
             }
         }

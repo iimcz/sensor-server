@@ -10,6 +10,8 @@ message ManagementRequest {
         REBOOT = 2;
         REBOOT_CLEAR = 3; // Also removes cached files
         ALIVE_CHECK = 4; // Ping
+        START = 5; // Starts ipw-firmware if not running
+        START_MUTE = 6; // Starts ipw-firmware with sound disabled
     }
     ManagementType management_type = 2;
 }
