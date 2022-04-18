@@ -41,7 +41,7 @@ namespace SensorServer.Pjlink
             }
             buffer[read - 1] = 0;
 
-            var message = Encoding.ASCII.GetString(buffer);
+            var message = Encoding.ASCII.GetString(buffer).ToUpper();
             if (message.StartsWith("PJLINK 0"))
             {
                 _auth = false;
@@ -52,7 +52,7 @@ namespace SensorServer.Pjlink
             }
             else
             {
-                throw new NotSupportedException("Invalid protocol: does not start with PJLINK 0 or PJLINK 1");
+                throw new NotSupportedException($"Invalid protocol: does not start with PJLINK 0 or PJLINK 1. Message: {message}");
             }
         }
 
@@ -80,7 +80,7 @@ namespace SensorServer.Pjlink
             }
             resp[read - 1] = 0;
 
-            return (TRes)cmd.ParseResponse(Encoding.ASCII.GetString(resp));
+            return (TRes)cmd.ParseResponse(Encoding.ASCII.GetString(resp).ToUpper());
         }
 
         private string ComputeMD5(string v)
@@ -230,7 +230,6 @@ namespace SensorServer.Pjlink
         public override PjlinkResponse ParseResponse(string rsp)
         {
             PjlinkPowerResponse response = (PjlinkPowerResponse)base.ParseResponse(rsp);
-            Console.WriteLine(response.Response);
 
             if (response.Response == ResponseType.Success && _power == Power.Query)
             {
