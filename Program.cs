@@ -37,8 +37,12 @@ namespace SensorServer
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ConsoleEventHandler);
 
             _protobufCommunication = new(config.CommunicationConfiguration.Host, config.CommunicationConfiguration.Port);
-
-            if (config.UdpCrestronAdapterConfiguration?.Enabled ?? false) _udpCrestronAdapter = new(config);
+            
+            if (config.UdpCrestronAdapterConfiguration?.Enabled ?? false)
+            {
+                IIpwServiceManager ipwServiceManager = new ShellIpwServiceManager(config.ShellIpwServiceConfiguration);
+                _udpCrestronAdapter = new(config, ipwServiceManager);
+            }
 
             while (true)
             {

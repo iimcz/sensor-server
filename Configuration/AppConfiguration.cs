@@ -15,6 +15,7 @@ namespace SensorServer.Configuration
         public PjlinkConfiguration PjlinkConfiguration { get; set; }
         public bool DepthCamera { get; set; } = false;
         public UdpCrestronAdapterConfiguration UdpCrestronAdapterConfiguration { get; set; }
+        public ShellIpwServiceConfiguration ShellIpwServiceConfiguration { get; set; }
 
         public AppConfiguration()
         {

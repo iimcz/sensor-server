@@ -5,6 +5,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using static Naki3D.Common.Protocol.ManagementRequest.Types;
 
 namespace SensorServer.RemoteManagement
@@ -15,14 +16,17 @@ namespace SensorServer.RemoteManagement
         private bool _finished;
 
         private readonly AppConfiguration _config;
+        private readonly IIpwServiceManager _serviceManager;
 
         private readonly byte[] _ack = Encoding.ASCII.GetBytes("DRES00");
         private readonly byte[] _success = Encoding.ASCII.GetBytes("DRES01");
         private readonly byte[] _failUnknown = Encoding.ASCII.GetBytes("DRES99");
 
-        public UdpCrestronAdapter(AppConfiguration config)
+        public UdpCrestronAdapter(AppConfiguration config, IIpwServiceManager serviceManager)
         {
             _config = config;
+            _serviceManager = serviceManager;
+
             _client = new UdpClient(_config.UdpCrestronAdapterConfiguration.Port);
         }
 
@@ -38,16 +42,22 @@ namespace SensorServer.RemoteManagement
                     string command = Encoding.ASCII.GetString(data);
                     _client.Send(_ack, _ack.Length, endPoint);
 
-                    var success = command switch
+                    ManagementType? managementType = command switch
                     {
-                        "DCMD00" => SendManagementMessage(ManagementType.Shutdown),
-                        "DCMD01" => SendManagementMessage(ManagementType.Start),
-                        "DCMD02" => SendManagementMessage(ManagementType.StartMute),
-                        _ => UnknownCommand(command)
+                        "DCMD00" => ManagementType.Shutdown,
+                        "DCMD01" => ManagementType.Start,
+                        "DCMD02" => ManagementType.StartMute,
+                        _ => null
                     };
 
+                    var success = managementType == null ? UnknownCommand(command) : SendManagementMessage(managementType.Value);
+
                     if (success) _client.Send(_success, _success.Length, endPoint);
-                    else _client.Send(_failUnknown, _failUnknown.Length, endPoint);
+                    else // IPW did not respond, resort to manually changing service
+                    {
+                        if (ExecuteManagementMessage(managementType)) _client.Send(_success, _success.Length, endPoint);
+                        else _client.Send(_failUnknown, _failUnknown.Length, endPoint);
+                    }
 
                     Console.WriteLine($"Executed UDP command: {command}");
                 }
@@ -99,10 +109,33 @@ namespace SensorServer.RemoteManagement
                 var response = ManagementResponse.Parser.ParseDelimitedFrom(stream);
                 return response.DeviceStatus == ManagementResponse.Types.DeviceStatus.Ok;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Failed to send remote management command, stacktrace: {ex}");
+                // Most probably a network related reason, no need to spam the console with stacktraces
+                Console.WriteLine($"Failed to send remote management command");
                 return false;
+            }
+        }
+
+        private bool ExecuteManagementMessage(ManagementType? type)
+        {
+            switch (type)
+            {
+                case ManagementType.Shutdown:
+                    _serviceManager.Stop();
+                    return true;
+                case ManagementType.Start:
+                    _serviceManager.Stop(); // To be absolutely sure we're not leaving some zombie process behind
+                    _serviceManager.Start();
+                    return true;
+                case ManagementType.StartMute:
+                    _serviceManager.Stop(); // To be absolutely sure we're not leaving some zombie process behind
+                    _serviceManager.Start();
+                    Thread.Sleep(_config.UdpCrestronAdapterConfiguration.UnityBootTimeout); // Wait for unity to load
+                    return SendManagementMessage(ManagementType.StartMute);
+                case null:
+                default:
+                    return false;
             }
         }
     }
