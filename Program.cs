@@ -41,7 +41,19 @@ namespace SensorServer
             if (config.UdpCrestronAdapterConfiguration?.Enabled ?? false)
             {
                 IIpwServiceManager ipwServiceManager = new ShellIpwServiceManager(config.ShellIpwServiceConfiguration);
-                _udpCrestronAdapter = new(config, ipwServiceManager);
+                IProjectorController projectorController = null;
+                switch (config.UdpCrestronAdapterConfiguration.ProjectorControl)
+                {
+                    case ProjectorControlType.HdmiCec:
+                        projectorController = new HdmiProjectorController();
+                        break;
+                    case ProjectorControlType.Pjlink:
+                        projectorController = new PjlinkProjectorController(config.PjlinkConfiguration);
+                        break;
+                }
+
+
+                _udpCrestronAdapter = new(config, ipwServiceManager, projectorController);
             }
 
             while (true)

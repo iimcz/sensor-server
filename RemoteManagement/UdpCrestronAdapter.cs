@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf;
 using Naki3D.Common.Protocol;
 using SensorServer.Configuration;
+using SensorServer.ProjectorControl;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -17,15 +18,17 @@ namespace SensorServer.RemoteManagement
 
         private readonly AppConfiguration _config;
         private readonly IIpwServiceManager _serviceManager;
+        private readonly IProjectorController _projectorController;
 
         private readonly byte[] _ack = Encoding.ASCII.GetBytes("DRES00");
         private readonly byte[] _success = Encoding.ASCII.GetBytes("DRES01");
         private readonly byte[] _failUnknown = Encoding.ASCII.GetBytes("DRES99");
 
-        public UdpCrestronAdapter(AppConfiguration config, IIpwServiceManager serviceManager)
+        public UdpCrestronAdapter(AppConfiguration config, IIpwServiceManager serviceManager, IProjectorController projectorController)
         {
             _config = config;
             _serviceManager = serviceManager;
+            _projectorController = projectorController;
 
             _client = new UdpClient(_config.UdpCrestronAdapterConfiguration.Port);
         }
@@ -123,12 +126,15 @@ namespace SensorServer.RemoteManagement
             {
                 case ManagementType.Shutdown:
                     _serviceManager.Stop();
+                    _projectorController?.PowerOff();
                     return true;
                 case ManagementType.Start:
+                    _projectorController?.PowerOn();
                     _serviceManager.Stop(); // To be absolutely sure we're not leaving some zombie process behind
                     _serviceManager.Start();
                     return true;
                 case ManagementType.StartMute:
+                    _projectorController?.PowerOn();
                     _serviceManager.Stop(); // To be absolutely sure we're not leaving some zombie process behind
                     _serviceManager.Start();
                     Thread.Sleep(_config.UdpCrestronAdapterConfiguration.UnityBootTimeout); // Wait for unity to load
