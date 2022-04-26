@@ -53,7 +53,7 @@ namespace SensorServer.RemoteManagement
                         _ => null
                     };
 
-                    var success = managementType == null ? UnknownCommand(command) : SendManagementMessage(managementType.Value);
+                    var success = managementType == null ? UnknownCommand(command) : SendManagementMessage(managementType.Value, 5);
 
                     if (success)
                     {
@@ -96,29 +96,43 @@ namespace SensorServer.RemoteManagement
         }
 
         // TODO: Split this into a standalone class when we have a proper management system in place
-        private bool SendManagementMessage(ManagementType type)
+        private bool SendManagementMessage(ManagementType type, int retries)
         {
-            try
+            int _try = 0;
+            while (true)
             {
-                var config = _config.CommunicationConfiguration;
-                var client = new TcpClient(config.Host, config.ManagementPort);
-                var stream = client.GetStream();
-
-                var message = new ManagementRequest
+                try
                 {
-                    ConnectionId = "*",
-                    ManagementType = type
-                };
+                    var config = _config.CommunicationConfiguration;
+                    var client = new TcpClient(config.Host, config.ManagementPort);
+                    var stream = client.GetStream();
 
-                message.WriteDelimitedTo(stream);
-                var response = ManagementResponse.Parser.ParseDelimitedFrom(stream);
-                return response.DeviceStatus == ManagementResponse.Types.DeviceStatus.Ok;
-            }
-            catch
-            {
-                // Most probably a network related reason, no need to spam the console with stacktraces
-                Console.WriteLine($"Failed to send remote management command");
-                return false;
+                    var message = new ManagementRequest
+                    {
+                        ConnectionId = "*",
+                        ManagementType = type
+                    };
+
+                    message.WriteDelimitedTo(stream);
+                    var response = ManagementResponse.Parser.ParseDelimitedFrom(stream);
+                    return response.DeviceStatus == ManagementResponse.Types.DeviceStatus.Ok;
+                }
+                catch
+                {
+                    // Most probably a network related reason, no need to spam the console with stacktraces
+                    Console.Write($"Failed to send remote management command...");
+                    if (_try < retries)
+                    {
+                        Console.WriteLine($"retrying after {_config.UdpCrestronAdapterConfiguration.UnityBootTimeout}s.");
+                        Thread.Sleep(_config.UdpCrestronAdapterConfiguration.UnityBootTimeout);
+                        _try++;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"failed after {retries} tries.");
+                        return false;
+                    }
+                }
             }
         }
 
@@ -139,8 +153,7 @@ namespace SensorServer.RemoteManagement
                     _projectorController?.PowerOn();
                     _serviceManager.Stop(); // To be absolutely sure we're not leaving some zombie process behind
                     _serviceManager.Start();
-                    Thread.Sleep(_config.UdpCrestronAdapterConfiguration.UnityBootTimeout); // Wait for unity to load
-                    return SendManagementMessage(ManagementType.StartMute);
+                    return SendManagementMessage(ManagementType.StartMute, 5);
                 case null:
                 default:
                     return false;
