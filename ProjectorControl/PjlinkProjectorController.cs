@@ -40,7 +40,7 @@ namespace SensorServer.ProjectorControl
 
             try
             {
-                Task.WaitAll(tasks, 1000);
+                Task.WaitAll(tasks, 60000);
             }
             catch (AggregateException e)
             {
@@ -80,7 +80,7 @@ namespace SensorServer.ProjectorControl
             
             try
             {
-                Task.WaitAll(tasks, 1000);
+                Task.WaitAll(tasks, 60000);
             }
             catch (AggregateException e)
             {

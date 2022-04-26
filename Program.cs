@@ -59,16 +59,17 @@ namespace SensorServer
             while (true)
             {
                 if (_finished) break;
-
-                _protobufCommunication.Connect();
-
-                Thread readThread = null;
+                
                 Thread crestronAdapterThread = null;
                 if (_udpCrestronAdapter != null)
                 {
                     crestronAdapterThread = new(_udpCrestronAdapter.Listen);
                     crestronAdapterThread.Start();
                 }
+
+                _protobufCommunication.Connect();
+
+                Thread readThread = null;
 
                 switch (config.ProjectorControl)
                 {

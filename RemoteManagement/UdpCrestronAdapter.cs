@@ -42,7 +42,7 @@ namespace SensorServer.RemoteManagement
                 try
                 {
                     byte[] data = _client.Receive(ref endPoint);
-                    string command = Encoding.ASCII.GetString(data);
+                    string command = Encoding.ASCII.GetString(data).Trim();
                     _client.Send(_ack, _ack.Length, endPoint);
 
                     ManagementType? managementType = command switch
@@ -55,14 +55,16 @@ namespace SensorServer.RemoteManagement
 
                     var success = managementType == null ? UnknownCommand(command) : SendManagementMessage(managementType.Value);
 
-                    if (success) _client.Send(_success, _success.Length, endPoint);
+                    if (success)
+                    {
+                        _client.Send(_success, _success.Length, endPoint);
+                        Console.WriteLine($"Executed UDP command: {command}");
+                    }
                     else // IPW did not respond, resort to manually changing service
                     {
                         if (ExecuteManagementMessage(managementType)) _client.Send(_success, _success.Length, endPoint);
                         else _client.Send(_failUnknown, _failUnknown.Length, endPoint);
                     }
-
-                    Console.WriteLine($"Executed UDP command: {command}");
                 }
                 catch (Exception ex)
                 {
