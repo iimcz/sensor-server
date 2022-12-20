@@ -1,0 +1,25 @@
+syntax = "proto3";
+package naki3d.common.protocol;
+
+import "Protos/types.proto";
+import "Protos/handtracking/handtracking.proto";
+
+message FingerState {
+    bool closed = 1; // Whether joints are bent
+    Vector3 position = 2; // Fingertip position relative to wrist 
+}
+
+message HandFingerState {
+    FingerState thumb = 1;
+    FingerState index = 2;
+    FingerState middle = 3;
+    FingerState ring = 4;
+    FingerState pinky = 5;
+}
+
+message MediapipeHandTrackingData {
+    HandSide side = 1;
+    Vector3 center_position = 2; // Geometric center of hand
+    HandFingerState finger_state = 3; 
+    HandGestureType gesture = 4; // Can be empty if no gesture was performed
+}

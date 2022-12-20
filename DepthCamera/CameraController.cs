@@ -124,8 +124,8 @@ namespace SensorServer.DepthCamera
                 leftHandContent.Y = leftHand.Proj.Y;
 
                 if(rightHand.Confidence >= _minConfidence){
-                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent);
-                    gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandType.HandRight, rightHandContent, out gesture);
+                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandSide.Right, rightHandContent);
+                    gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandSide.Right, rightHandContent, out gesture);
 
                     if(gestureDetected)
                     {
@@ -134,8 +134,8 @@ namespace SensorServer.DepthCamera
                 }
 
                 if(leftHand.Confidence >= _minConfidence){
-                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent);
-                    gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandType.HandLeft, leftHandContent, out gesture);
+                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandSide.Left, leftHandContent);
+                    gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandSide.Left, leftHandContent, out gesture);
                     
                     if(gestureDetected)
                     {

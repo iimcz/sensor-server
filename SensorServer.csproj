@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Protos\camera.proto" />
     <None Remove="Protos\commands.proto" />
     <None Remove="Protos\connection.proto" />
+    <None Remove="Protos\event.proto" />
     <None Remove="Protos\keyboard.proto" />
     <None Remove="Protos\management.proto" />
     <None Remove="Protos\mouse.proto" />
@@ -18,6 +18,9 @@
     <None Remove="Protos\sensor.proto" />
     <None Remove="Protos\types.proto" />
     <None Remove="Protos\wrappers.proto" />
+    <None Remove="Protos\handtracking\handtracking.proto" />
+    <None Remove="Protos\handtracking\realsense.proto" />
+    <None Remove="Protos\handtracking\mediapipe.proto" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,9 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\camera.proto" GrpcServices="None" />
     <Protobuf Include="Protos\commands.proto" GrpcServices="None" />
     <Protobuf Include="Protos\connection.proto" GrpcServices="None" />
+    <Protobuf Include="Protos\event.proto" GrpcServices="None" />
     <Protobuf Include="Protos\keyboard.proto" GrpcServices="None" />
     <Protobuf Include="Protos\management.proto" GrpcServices="None" />
     <Protobuf Include="Protos\mouse.proto" GrpcServices="None" />
@@ -40,6 +43,9 @@
     <Protobuf Include="Protos\sensor.proto" GrpcServices="None" />
     <Protobuf Include="Protos\types.proto" GrpcServices="None" />
     <Protobuf Include="Protos\wrappers.proto" GrpcServices="None" />
+    <Protobuf Include="Protos\handtracking\handtracking.proto" GrpcServices="None" />
+    <Protobuf Include="Protos\handtracking\realsense.proto" GrpcServices="None" />
+    <Protobuf Include="Protos\handtracking\mediapipe.proto" GrpcServices="None" />
   </ItemGroup>
 
   <ItemGroup>

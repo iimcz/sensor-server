@@ -7,6 +7,7 @@ message Resource {
     Model3D model = 2;
     Image image = 3;
     Video video = 4;
+    Panorama panorama = 7;
   }
   string input_mapping = 5; // Probably JSON, we've agreed there's no point in binding it on protobuf layer
   repeated EventScript additional_scripts = 6;
@@ -44,6 +45,13 @@ message Scene3D {
   // alternatively
   //bytes datapack_payload = 2;
 
+}
+
+message Panorama {
+  bytes data = 1; //Maybe separate panoramas for left/right eye in future
+  //field 2 placeholder for left/right split
+  double rotation_speed = 3;
+  double camera_vertical_angle = 4;
 }
 
 message Environment {

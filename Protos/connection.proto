@@ -28,7 +28,7 @@ enum SensorType {
   SENSOR_TYPE_LIGHT = 3;
   SENSOR_TYPE_MICROPHONE = 4;
   SENSOR_TYPE_IR = 5;
-  // TODO: other sensors?
+  SENSOR_TYPE_HANDTRACKING = 6;
 }
 enum DeviceType {
   DEVICE_TYPE_UNKNOWN = 0;

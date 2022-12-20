@@ -63,7 +63,7 @@ namespace SensorServer
             Naki3D.Common.Protocol.GestureData gestureData = new()
             {
                 UserId = gesture.UserID,
-                Type = (Naki3D.Common.Protocol.GestureType)gesture.Type
+                Type = (Naki3D.Common.Protocol.HandGestureType)gesture.Type
             };
             SensorMessage message = new()
             {
@@ -83,7 +83,7 @@ namespace SensorServer
         /// <param name="timestamp">Time when the gesture was detected</param>
         /// <param name="handType">Hand type (left, right)</param>
         /// <param name="hand">Hand data</param>
-        public void SendHandMovement(string sensorId, int userId, ulong timestamp, HandType handType, HandContent hand)
+        public void SendHandMovement(string sensorId, int userId, ulong timestamp, HandSide handType, HandContent hand)
         {
             Naki3D.Common.Protocol.Vector3 vector3 = new()
             {
@@ -95,7 +95,7 @@ namespace SensorServer
             {
                 Hand = handType,
                 ProjPosition = vector3,
-                OpenHand = !hand.Click,
+                // TODO: reintroduce OpenHand somewhere
                 UserId = userId
             };
             SensorMessage message = new()
