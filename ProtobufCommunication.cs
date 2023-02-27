@@ -4,6 +4,7 @@ using nuitrack;
 using SensorServer.ProjectorControl;
 using System;
 using System.Net.Sockets;
+using System.Collections.Generic;
 
 namespace SensorServer
 {
@@ -36,6 +37,7 @@ namespace SensorServer
                 {
                     _tcpClient = new TcpClient(_ip, _port);
                     _networkStream = _tcpClient.GetStream();
+                    SendAllDiscovery();
                     break;
                 }
                 catch (System.Exception e)
@@ -58,20 +60,40 @@ namespace SensorServer
         /// <param name="sensorId">ID of the sensor that detected the gesture</param>
         /// <param name="timestamp">Time when the gesture was detected</param>
         /// <param name="gesture">Gesture type (swipe left, swipe right, swipe up, swipe down)</param>
-        public void SendGestureData(string sensorId, ulong timestamp, Gesture gesture)
+        public void SendGestureData(int Id, ulong timestamp, Gesture gesture, DepthCamera.CameraController.HandSide handSide)
         {
-            Naki3D.Common.Protocol.GestureData gestureData = new()
+            GestureType type = gesture.Type;
+            SensorDataMessage data = new SensorDataMessage()
             {
-                UserId = gesture.UserID,
-                Type = (Naki3D.Common.Protocol.HandGestureType)gesture.Type
-            };
-            SensorMessage message = new()
-            {
-                SensorId = sensorId,
                 Timestamp = timestamp,
-                Gesture = gestureData
+                Void = new Google.Protobuf.WellKnownTypes.Empty()
             };
-            System.Console.WriteLine(gesture.Type);
+
+            string path = $"nuitrack/handtracking/user/{Id}/hand/{handSide}/gestures";
+            switch (type)
+            {
+                case GestureType.GestureSwipeLeft:
+                    data.Path = path + "/swipe_left";
+                    break;
+
+                case GestureType.GestureSwipeRight:
+                    data.Path = path + "/swipe_right";
+                    break;
+
+                case GestureType.GestureSwipeUp:
+                    data.Path = path + "/swipe_up";
+                    break;
+
+                case GestureType.GestureSwipeDown:
+                    data.Path = path + "/swipe_down";
+                    break;
+            }
+
+            SensorMessage message = new SensorMessage()
+            { 
+                Data = data 
+            };
+            System.Console.WriteLine(type);
             SendMessage(message);
         }
 
@@ -83,26 +105,25 @@ namespace SensorServer
         /// <param name="timestamp">Time when the gesture was detected</param>
         /// <param name="handType">Hand type (left, right)</param>
         /// <param name="hand">Hand data</param>
-        public void SendHandMovement(string sensorId, int userId, ulong timestamp, HandSide handType, HandContent hand)
+        public void SendHandMovement(int userId, ulong timestamp, DepthCamera.CameraController.HandSide handSide, HandContent hand)
         {
-            Naki3D.Common.Protocol.Vector3 vector3 = new()
+            Vector3Data vector = new Vector3Data()
             {
                 X = hand.X,
                 Y = hand.Y,
                 Z = hand.ZReal
             };
-            HandMovementData handMovementData = new()
+
+            SensorDataMessage data = new SensorDataMessage()
             {
-                Hand = handType,
-                ProjPosition = vector3,
-                // TODO: reintroduce OpenHand somewhere
-                UserId = userId
-            };
-            SensorMessage message = new()
-            {
-                SensorId = sensorId,
+                Path = $"nuitrack/handtracking/user/{userId}/hand/{handSide}/center_position",
                 Timestamp = timestamp,
-                HandMovement = handMovementData
+                Vector3 = vector
+            };
+
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
             };
             SendMessage(message);
         }
@@ -110,6 +131,41 @@ namespace SensorServer
         {
             sensorMessage.WriteDelimitedTo(_networkStream);
             _networkStream.Flush();
+        }
+
+        private void SendAllDiscovery()
+        {
+            Dictionary<string, DataType> typeMap = new Dictionary<string, DataType>()
+            {
+                {"/center_position", DataType.Vector3 },
+
+                {"/gestures/swipe_left", DataType.Void },
+                {"/gestures/swipe_right", DataType.Void },
+                {"/gestures/swipe_up", DataType.Void },
+                {"/gestures/swipe_down", DataType.Void }
+            };
+
+            foreach(KeyValuePair<string, DataType> type in typeMap)
+            {
+                SendDiscovery("nuitrack/handtracking/user/[0,1,2,...]/hand/left" + type.Key, type.Value);
+                SendDiscovery("nuitrack/handtracking/user/[0,1,2,...]/hand/right" + type.Key, type.Value);
+            }
+        }
+
+        private void SendDiscovery(string path, DataType dataType)
+        {
+            SensorDescriptor descriptor = new SensorDescriptor()
+            {
+                Model = "Nuiitrack v" + Nuitrack.GetVersion().ToString(),
+                Path = path,
+                DataType = dataType
+            };
+
+            SensorMessage message = new SensorMessage()
+            {
+                Descriptor_ = descriptor
+            };
+            SendMessage(message);
         }
 
         public void Start()

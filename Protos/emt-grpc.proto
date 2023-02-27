@@ -1,0 +1,98 @@
+syntax = "proto3";
+package naki3d.common.protocol;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+import "Protos/discovery.proto";
+
+// TODO: consider splitting services to separate files.
+
+message BeaconMessage {
+    // Current version is 2
+    int32 protocol_version = 1;
+    string hostname = 2;
+    // Device type is mostly for display purposes - actual device tree is requested separately.
+    string device_type = 3;
+}
+
+
+message PingRequest {
+    // Payload to expect back from the gRPC server.
+    string msg = 1;
+}
+
+message PingResponse {
+    // Should be same as msg in PingRequest.
+    string echo = 1;
+}
+
+service ConnectionService {
+    // Similar to a network ping, serves to check connectivity since
+    // not all gRPC implementations allow checking if a channel is connected.
+    rpc Ping (PingRequest) returns (PingResponse);
+}
+
+message LoadPackageRequest {
+    string descriptor_json = 1; // Package descriptor as defined in the json schema in this repository.
+    bool is_preview = 2; // Loading for preview could skip dependencies for faster download.
+}
+
+message ClearStartupPackageRequest {
+    bool purge_data = 1; // Whether the package should be deleted from the cache.
+}
+
+message StartupPackageResponse {
+    string package_id = 1;
+}
+
+message SetStartupPackageRequest {
+    string package_id = 1;
+}
+
+message StartPackageRequest {
+    string package_id = 1;
+}
+
+message CachedPackagesResponse {
+    message SinglePackage {
+        string package_id = 1;
+        string checksum = 2;
+        google.protobuf.Timestamp download_time = 3;
+    }
+    repeated SinglePackage packages = 1;
+}
+
+service PackageService {
+    // Tell the device to dowload the specified package and save it in the cache.
+    rpc LoadPackage (LoadPackageRequest) returns (google.protobuf.BoolValue);
+    // Set no startup package so that the device stays on the calibration screen next boot.
+    rpc ClearStartupPackage (ClearStartupPackageRequest) returns (google.protobuf.BoolValue);
+    // Ask the device which package is set as startup and will be loaded after calibration.
+    rpc GetStartupPackage (google.protobuf.Empty) returns (StartupPackageResponse);
+    // Set specific startup package to be loaded after calibration.
+    rpc SetStartupPackage (SetStartupPackageRequest) returns (google.protobuf.BoolValue);
+    // Delete all downloaded packages from the cache.
+    rpc PurgeCachedPackages (google.protobuf.Empty) returns (google.protobuf.Empty);
+    // Get information about currently cached packages.
+    rpc GetCachedPackages (google.protobuf.Empty) returns (CachedPackagesResponse);
+    // Run a specific package. Has to be downloaded separately using LoadPackage.
+    rpc StartPackage (StartPackageRequest) returns (google.protobuf.BoolValue);
+}
+
+message DeviceDescriptorResponse {
+    int32 protocol_version = 1;
+    string hostname = 2;
+    string device_type = 3;
+    string firmware_version = 4;
+
+    repeated SensorDescriptor available_sensors = 5;
+}
+
+service DeviceService {
+    // Ask the device what it is, which sensors it has and other defining characteristics.
+    rpc GetDeviceDescriptor (google.protobuf.Empty) returns (DeviceDescriptorResponse);
+    // Sets the device audio level 0.0 - 1.0
+    rpc SetVolume (google.protobuf.FloatValue) returns (google.protobuf.Empty);
+}

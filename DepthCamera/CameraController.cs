@@ -103,7 +103,11 @@ namespace SensorServer.DepthCamera
             _finished = true;
         }
 
-
+        public enum HandSide
+        {
+            Left,
+            Right
+        }
         /// <summary>
         /// Handle skeleton update and send data abou detected gestures
         /// </summary>
@@ -124,22 +128,22 @@ namespace SensorServer.DepthCamera
                 leftHandContent.Y = leftHand.Proj.Y;
 
                 if(rightHand.Confidence >= _minConfidence){
-                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandSide.Right, rightHandContent);
-                    gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandSide.Right, rightHandContent, out gesture);
+                    _dataSender.SendHandMovement(skeleton.ID, skeletonData.Timestamp, HandSide.Right, rightHandContent);
+                    gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Right, rightHandContent, out gesture);
 
                     if(gestureDetected)
                     {
-                        _dataSender.SendGestureData("1", skeletonData.Timestamp, gesture);
+                        _dataSender.SendGestureData(skeleton.ID, skeletonData.Timestamp, gesture, HandSide.Right);
                     }
                 }
 
                 if(leftHand.Confidence >= _minConfidence){
-                    _dataSender.SendHandMovement("1", skeleton.ID, skeletonData.Timestamp, Naki3D.Common.Protocol.HandSide.Left, leftHandContent);
-                    gestureDetected = _gestureDetector.Update(skeleton.ID, Naki3D.Common.Protocol.HandSide.Left, leftHandContent, out gesture);
+                    _dataSender.SendHandMovement(skeleton.ID, skeletonData.Timestamp, HandSide.Left, leftHandContent);
+                    gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Left, leftHandContent, out gesture);
                     
                     if(gestureDetected)
                     {
-                        _dataSender.SendGestureData("1", skeletonData.Timestamp, gesture);
+                        _dataSender.SendGestureData(skeleton.ID, skeletonData.Timestamp, gesture, HandSide.Left);
                     }
                 }
             }

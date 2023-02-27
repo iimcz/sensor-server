@@ -31,7 +31,7 @@ namespace SensorServer.DepthCamera
         /// <param name="handContent">Information abou new hand position</param>
         /// <param name="outGesture">Output paremeter will contain geture type if gesture is detected</param>
         /// <returns>True if gesture was detected, False otherwise</returns>
-        public bool Update(int userId, Naki3D.Common.Protocol.HandSide handType, HandContent handContent, out Gesture outGesture)
+        public bool Update(int userId, DepthCamera.CameraController.HandSide handType, HandContent handContent, out Gesture outGesture)
         {
             Hand hand = new Hand(handContent.X, handContent.Y, _config.HorizontalGridSize, _config.VerticalGridSize);
             GestureType gestureType;
@@ -45,7 +45,7 @@ namespace SensorServer.DepthCamera
 
             Gesture gesture = new Gesture();
 
-            if(handType == Naki3D.Common.Protocol.HandSide.Right)
+            if(handType == DepthCamera.CameraController.HandSide.Right)
             {
                 //Console.WriteLine($"[{hand.RealX}, {hand.RealY}]");
                 gestureDetected = DetectGesture(user.RightHand, hand, out gestureType);

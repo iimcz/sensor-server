@@ -1,8 +1,0 @@
-syntax = "proto3";
-package naki3d.common.protocol;
-
-// Device -> Device
-message EventData {
-    string name = 1;
-    string parameters = 2; // No strict definition, can be context-specific
-}

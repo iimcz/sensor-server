@@ -1,19 +1,56 @@
 syntax = "proto3";
 package naki3d.common.protocol;
 
-// We've covered there's going to be an optional management app, but not the capabilities, just a placeholder
-message ManagementRequest {
-    string connection_id = 1; // ID of target PC
-    enum ManagementType {
-        SHUTDOWN = 0;
-        SHUTDOWN_CLEAR = 1; // Also removes cached files
-        REBOOT = 2;
-        REBOOT_CLEAR = 3; // Also removes cached files
-        ALIVE_CHECK = 4; // Ping
-        START = 5; // Starts ipw-firmware if not running
-        START_MUTE = 6; // Starts ipw-firmware with sound disabled
+import "google/protobuf/empty.proto";
+
+service ManagementService 
+{
+    // Shuts the entire emt_sdk enabled device down
+    rpc Shutdown (google.protobuf.Empty) returns (ManagementResponse);
+    // Reboots the entire emt_sdk reboot device
+    rpc Reboot (google.protobuf.Empty) returns (ManagementResponse);
+    // Starts the main ipw service
+    rpc Start (StartRequest) returns (ManagementResponse);
+    // Stops the main ipw service
+    rpc Stop (google.protobuf.Empty) returns (ManagementResponse);
+    // Request contents of the main log file, like the Unity log.
+    rpc GetLogs (LogsRequest) returns (LogsResponse);
+    // Request status of all *relevant* services running on the machine.
+    rpc GetServiceStatus (ServiceStatusRequest) returns (ServiceStatusResponse);
+
+    // TODO: define the rest of the diagnostic service as per development discussion.
+}
+
+message LogsRequest {
+    // How many lines from the end of the log to request.
+    optional int32 lines = 1;
+}
+
+message LogsResponse {
+    repeated string log_line = 1;
+}
+
+message ServiceStatusRequest {
+    // Empty, but can be expected to grow later when
+    // the request gets better defined.
+}
+
+message ServiceStatusResponse {
+    enum ServiceStatus {
+        SERVICE_STOPPED = 0;
+        SERVICE_RUNNING = 1;
+        SERVICE_CRASHED = 2;
     }
-    ManagementType management_type = 2;
+    message Service {
+        string service_name = 1;
+        ServiceStatus status = 2;
+    }
+    repeated Service services = 1;
+}
+
+message StartRequest {
+    // Whether the started application should mute itself on startup
+    bool mute_audio = 1;
 }
 
 message ManagementResponse {
