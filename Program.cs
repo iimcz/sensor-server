@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using SensorServer.Configuration;
 using SensorServer.DepthCamera;
 using SensorServer.ProjectorControl;
-using SensorServer.RemoteManagement;
 
 namespace SensorServer
 {
@@ -13,7 +12,6 @@ namespace SensorServer
     {
         private static CameraController _cameraController = null;
         private static ProtobufCommunication _protobufCommunication = null;
-        private static UdpCrestronAdapter _udpCrestronAdapter = null;
 
         private static bool _finished = false;
 
@@ -36,36 +34,11 @@ namespace SensorServer
 
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ConsoleEventHandler);
 
-            _protobufCommunication = new(config.CommunicationConfiguration.Host, config.CommunicationConfiguration.Port);
-            
-            if (config.UdpCrestronAdapterConfiguration?.Enabled ?? false)
-            {
-                IIpwServiceManager ipwServiceManager = new ShellIpwServiceManager(config.ShellIpwServiceConfiguration);
-                IProjectorController projectorController = null;
-                switch (config.UdpCrestronAdapterConfiguration.ProjectorControl)
-                {
-                    case ProjectorControlType.HdmiCec:
-                        projectorController = new HdmiProjectorController();
-                        break;
-                    case ProjectorControlType.Pjlink:
-                        projectorController = new PjlinkProjectorController(config.PjlinkConfiguration);
-                        break;
-                }
-
-
-                _udpCrestronAdapter = new(config, ipwServiceManager, projectorController);
-            }
+            _protobufCommunication = new(config.CommunicationConfiguration.Host, config.CommunicationConfiguration.Port, config.DepthCameraConfiguration.MaxUsers);
 
             while (true)
             {
                 if (_finished) break;
-                
-                Thread crestronAdapterThread = null;
-                if (_udpCrestronAdapter != null)
-                {
-                    crestronAdapterThread = new(_udpCrestronAdapter.Listen);
-                    crestronAdapterThread.Start();
-                }
 
                 _protobufCommunication.Connect();
 
@@ -114,7 +87,6 @@ namespace SensorServer
                 }
 
                 if (readThread != null) readThread.Join();
-                if (crestronAdapterThread != null) crestronAdapterThread.Join();
             }
         }
 
@@ -132,11 +104,6 @@ namespace SensorServer
                 {
                     _cameraController.Stop();
                     _cameraController.Dispose();
-                }
-
-                if (_udpCrestronAdapter != null)
-                {
-                    _udpCrestronAdapter.Stop();
                 }
             }
         }

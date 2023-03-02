@@ -9,5 +9,6 @@ namespace SensorServer.Configuration
         public float JointMinConfidence { get; set; } = 0.75f; // Minimal joint confident
         public float HorizontalGridSize { get; set; } = 0.1f; 
         public float VerticalGridSize { get; set; } = 0.1f;
+        public int MaxUsers { get; set; } = 6;
     }
 }

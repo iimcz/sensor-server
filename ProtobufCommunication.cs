@@ -12,6 +12,7 @@ namespace SensorServer
     {
         private readonly string _ip;
         private readonly int _port;
+        private readonly int _maxUsers;
 
         private TcpClient _tcpClient;
         private NetworkStream _networkStream;
@@ -21,10 +22,11 @@ namespace SensorServer
 
         public IProjectorController ProjectorController { get => _projectorController; set => _projectorController = value; }
 
-        public ProtobufCommunication(string ip, int port)
+        public ProtobufCommunication(string ip, int port, int maxUsers)
         {
             _ip = ip;
             _port = port;
+            _maxUsers = maxUsers;
         }
 
         public void Connect()
@@ -69,7 +71,7 @@ namespace SensorServer
                 Void = new Google.Protobuf.WellKnownTypes.Empty()
             };
 
-            string path = $"nuitrack/handtracking/user/{Id}/hand/{handSide}/gestures";
+            string path = $"nuitrack/handtracking/user/0/hand/{handSide.ToString().ToLower()}/gestures"; //Max one user with id 0
             switch (type)
             {
                 case GestureType.GestureSwipeLeft:
@@ -116,7 +118,7 @@ namespace SensorServer
 
             SensorDataMessage data = new SensorDataMessage()
             {
-                Path = $"nuitrack/handtracking/user/{userId}/hand/{handSide}/center_position",
+                Path = $"nuitrack/handtracking/user/0/hand/{handSide.ToString().ToLower()}/center_position", //Max one user with id 0
                 Timestamp = timestamp,
                 Vector3 = vector
             };
@@ -129,8 +131,20 @@ namespace SensorServer
         }
         private void SendMessage(SensorMessage sensorMessage)
         {
-            sensorMessage.WriteDelimitedTo(_networkStream);
-            _networkStream.Flush();
+            try
+            {
+                sensorMessage.WriteDelimitedTo(_networkStream);
+                _networkStream.Flush();
+            }
+            catch(System.Exception e)
+            {
+                Console.WriteLine($"Message sendig failed: {e.Message}");
+                if(!IsConnected())
+                {
+                    Console.WriteLine("Reconnecting...");
+                    Connect();
+                }
+            }
         }
 
         private void SendAllDiscovery()
@@ -145,10 +159,13 @@ namespace SensorServer
                 {"/gestures/swipe_down", DataType.Void }
             };
 
-            foreach(KeyValuePair<string, DataType> type in typeMap)
+            for(int i = 0; i < _maxUsers; i++)
             {
-                SendDiscovery("nuitrack/handtracking/user/[0,1,2,...]/hand/left" + type.Key, type.Value);
-                SendDiscovery("nuitrack/handtracking/user/[0,1,2,...]/hand/right" + type.Key, type.Value);
+                foreach(KeyValuePair<string, DataType> type in typeMap)
+                {
+                    SendDiscovery($"nuitrack/handtracking/user/{i}/hand/left" + type.Key, type.Value);
+                    SendDiscovery($"nuitrack/handtracking/user/{i}/hand/right" + type.Key, type.Value);
+                }
             }
         }
 
@@ -156,11 +173,11 @@ namespace SensorServer
         {
             SensorDescriptor descriptor = new SensorDescriptor()
             {
-                Model = "Nuiitrack v" + Nuitrack.GetVersion().ToString(),
+                Model = "Nuitrack v",
                 Path = path,
                 DataType = dataType
             };
-
+            
             SensorMessage message = new SensorMessage()
             {
                 Descriptor_ = descriptor

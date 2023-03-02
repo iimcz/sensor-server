@@ -1,7 +1,7 @@
 {
     "CommunicationConfiguration": {
-        "Host": "localhost",
-        "Port": 5000
+        "Host": "192.168.22.65",
+        "Port": 8915
     },
     "DepthCameraConfiguration": {
         "BackgroundMode": "static_first_frame",
@@ -10,9 +10,10 @@
         "GestureLength": 2,
         "JointMinConfidence": 0.75,
         "HorizontalGridSize": 0.1,
-        "VerticalGridSize": 0.14
+        "VerticalGridSize": 0.14,
+        "MaxUsers": 0
     },
-    "ProjectorControl": 2,
+    "ProjectorControl": 0,
     "DepthCamera": true,
     "PjlinkConfiguration": {
         "Hosts": [
