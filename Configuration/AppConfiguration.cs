@@ -16,6 +16,9 @@ namespace SensorServer.Configuration
         public bool DepthCamera { get; set; } = false;
         public UdpCrestronAdapterConfiguration UdpCrestronAdapterConfiguration { get; set; }
         public ShellIpwServiceConfiguration ShellIpwServiceConfiguration { get; set; }
+        public bool LightSensor { get; set; } = false;
+        public bool UltrasonicDistance { get; set; } = false;
+        public int UltrasonicDistancePin { get; set; } = 10;
 
         public AppConfiguration()
         {

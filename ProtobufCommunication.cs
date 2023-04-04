@@ -20,13 +20,18 @@ namespace SensorServer
         private IProjectorController _projectorController;
         private bool _finished = false;
 
+        private readonly bool _lightSensor;
+        private readonly bool _ultrasonicDistance;
+
         public IProjectorController ProjectorController { get => _projectorController; set => _projectorController = value; }
 
-        public ProtobufCommunication(string ip, int port, int maxUsers)
+        public ProtobufCommunication(string ip, int port, int maxUsers, bool lightSensor, bool ultrasonicDistance)
         {
             _ip = ip;
             _port = port;
             _maxUsers = maxUsers;
+            _lightSensor = lightSensor;
+            _ultrasonicDistance = ultrasonicDistance;
         }
 
         public void Connect()
@@ -167,6 +172,16 @@ namespace SensorServer
                     SendDiscovery($"nuitrack/handtracking/user/{i}/hand/right" + type.Key, type.Value);
                 }
             }
+
+            if (_lightSensor)
+            {
+                SendDiscovery($"lightsensor/value", DataType.Float);
+            }
+
+            if (_ultrasonicDistance)
+            {
+                SendDiscovery($"ultrasonicdistance/value", DataType.Float);
+            }
         }
 
         private void SendDiscovery(string path, DataType dataType)
@@ -181,6 +196,39 @@ namespace SensorServer
             SensorMessage message = new SensorMessage()
             {
                 Descriptor_ = descriptor
+            };
+            SendMessage(message);
+        }
+        public void SendLightValue(double value)
+        {
+            DateTimeOffset now = DateTime.UtcNow;
+            ulong time = (ulong)now.ToUnixTimeSeconds();
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"lightsensor/value",
+                Timestamp = time,
+                Float = (float)value
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
+            };
+            SendMessage(message);
+        }
+
+        public void SendDistance(float value)
+        {
+            DateTimeOffset now = DateTime.UtcNow;
+            ulong time = (ulong)now.ToUnixTimeSeconds();
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"ultrasonicdistance/value",
+                Timestamp = time,
+                Float = value
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
             };
             SendMessage(message);
         }
