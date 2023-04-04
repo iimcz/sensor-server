@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <RollForward>LatestMajor</RollForward>
     <AssemblyName>SensorServer</AssemblyName>
     <RootNamespace>SensorServer</RootNamespace>
   </PropertyGroup>
