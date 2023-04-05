@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SensorServer.Configuration;
+using System;
 using System.Device.I2c;
 using System.Threading;
 
@@ -6,6 +7,7 @@ namespace SensorServer.LightSensor
 {
     class LightSensorController : IDisposable
     {
+        private readonly LightSensorConfiguration _configuration;
         private bool _finished = false;
 
         private const int _busId = 1;
@@ -14,8 +16,9 @@ namespace SensorServer.LightSensor
         private readonly AnalogPorts _analogPorts;
 
         private readonly ProtobufCommunication _dataSender;
-        public LightSensorController(ProtobufCommunication DataSender)
+        public LightSensorController(ProtobufCommunication DataSender, LightSensorConfiguration configuration)
         {
+            _configuration = configuration;
             _dataSender = DataSender;
             _i2cConnectionSettings = new(_busId, AnalogPorts.DefaultI2cAddress);
 			_i2cDevice = I2cDevice.Create(_i2cConnectionSettings);
@@ -25,9 +28,9 @@ namespace SensorServer.LightSensor
         {
             while (!_finished)
             {
-                double value = _analogPorts.Read(AnalogPorts.AnalogPort.A0);
+                double value = _analogPorts.Read(_configuration.LightSensonPin);
                 _dataSender.SendLightValue(value);
-                Thread.Sleep(100);
+                Thread.Sleep(_configuration.ReadInterval);
             }
         }
         public void Stop()

@@ -2,6 +2,7 @@
 using System.Device.Gpio;
 using System.Threading;
 using System.Diagnostics;
+using SensorServer.Configuration;
 
 namespace SensorServer.UltrasonicDistance
 {
@@ -10,22 +11,19 @@ namespace SensorServer.UltrasonicDistance
         private bool _finished = false;
 
         private readonly ProtobufCommunication _dataSender;
+        private readonly UltrasonicDistanceConfiguration _configuration;
         private GpioController _controller;
-        private readonly int _pin;
 
-        // TODO: use Stopwatch for these timeouts as well to make them not
-        // hardware dependent
-        private long _timeout1 = 100000;
-        private long _timeout2 = 10000000;
         private Stopwatch _sleepWatch = new Stopwatch();
         private Stopwatch _measureWatch = new Stopwatch();
+        private Stopwatch _timeoutWatch = new Stopwatch();
 
-        public UltrasonicDistanceController(ProtobufCommunication DataSender, int Pin)
+        public UltrasonicDistanceController(ProtobufCommunication DataSender, UltrasonicDistanceConfiguration configuration)
         {
             _dataSender = DataSender;
-            _pin = Pin;
+            _configuration = configuration;
             _controller = new GpioController();
-            _controller.OpenPin(_pin);
+            _controller.OpenPin(_configuration.UltrasonicDistancePin);
         }
         public void Start()
         {
@@ -37,8 +35,7 @@ namespace SensorServer.UltrasonicDistance
                     _dataSender.SendDistance(distance);
                 }
 
-                // TODO: maybe make this configurable
-                Thread.Sleep(500);
+                Thread.Sleep(_configuration.ReadInterval);
             }
         }
         public void Stop()
@@ -64,43 +61,41 @@ namespace SensorServer.UltrasonicDistance
         {
             _measureWatch.Restart();
             Console.WriteLine("Starting distance reading.");
-            _controller.SetPinMode(_pin, PinMode.Output);
-            _controller.Write(_pin, PinValue.Low);
+            _controller.SetPinMode(_configuration.UltrasonicDistancePin, PinMode.Output);
+            _controller.Write(_configuration.UltrasonicDistancePin, PinValue.Low);
             MicroSleep(2);
-            _controller.Write(_pin, PinValue.High);
+            _controller.Write(_configuration.UltrasonicDistancePin, PinValue.High);
             MicroSleep(10);
-            _controller.Write(_pin, PinValue.Low);
+            _controller.Write(_configuration.UltrasonicDistancePin, PinValue.Low);
 
-            _controller.SetPinMode(_pin, PinMode.Input);
+            _controller.SetPinMode(_configuration.UltrasonicDistancePin, PinMode.Input);
             float t0 = ((float)_measureWatch.ElapsedTicks / Stopwatch.Frequency) * 1000000.0f;
-            long count = 0;
 
-            while(count < _timeout1)
+            _timeoutWatch.Restart();
+            while(true)
             {
-                PinValue value = _controller.Read(_pin);
+                PinValue value = _controller.Read(_configuration.UltrasonicDistancePin);
                 if(value == PinValue.High)
                 {
                     break;
                 }
-                count++;
-                if(count >= _timeout1)
+                if(((double)_timeoutWatch.ElapsedTicks / Stopwatch.Frequency) * 1000000.0 > _configuration.Timeout1)
                 {
                     return null;
                 }
             }
 
             float t1 = ((float)_measureWatch.ElapsedTicks / Stopwatch.Frequency) * 1000000.0f;
-            count = 0;
 
-            while (count < _timeout2)
+            _timeoutWatch.Restart();
+            while (true)
             {
-                PinValue value = _controller.Read(_pin);
+                PinValue value = _controller.Read(_configuration.UltrasonicDistancePin);
                 if (value == PinValue.Low)
                 {
                     break;
                 }
-                count++;
-                if (count >= _timeout2)
+                if (((double)_timeoutWatch.ElapsedTicks / Stopwatch.Frequency) * 1000000.0 > _configuration.Timeout2)
                 {
                     return null;
                 }

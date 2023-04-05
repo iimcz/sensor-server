@@ -5,33 +5,25 @@ using SensorServer.ProjectorControl;
 using System;
 using System.Net.Sockets;
 using System.Collections.Generic;
+using SensorServer.Configuration;
 
 namespace SensorServer
 {
     class ProtobufCommunication
     {
-        private readonly string _ip;
-        private readonly int _port;
-        private readonly int _maxUsers;
-
         private TcpClient _tcpClient;
         private NetworkStream _networkStream;
 
         private IProjectorController _projectorController;
         private bool _finished = false;
 
-        private readonly bool _lightSensor;
-        private readonly bool _ultrasonicDistance;
+        private readonly AppConfiguration _configuration;
 
         public IProjectorController ProjectorController { get => _projectorController; set => _projectorController = value; }
 
-        public ProtobufCommunication(string ip, int port, int maxUsers, bool lightSensor, bool ultrasonicDistance)
+        public ProtobufCommunication(AppConfiguration configuration)
         {
-            _ip = ip;
-            _port = port;
-            _maxUsers = maxUsers;
-            _lightSensor = lightSensor;
-            _ultrasonicDistance = ultrasonicDistance;
+            _configuration = configuration;
         }
 
         public void Connect()
@@ -42,7 +34,7 @@ namespace SensorServer
 
                 try
                 {
-                    _tcpClient = new TcpClient(_ip, _port);
+                    _tcpClient = new TcpClient(_configuration.CommunicationConfiguration.Host, _configuration.CommunicationConfiguration.Port);
                     _networkStream = _tcpClient.GetStream();
                     SendAllDiscovery();
                     break;
@@ -164,7 +156,7 @@ namespace SensorServer
                 {"/gestures/swipe_down", DataType.Void }
             };
 
-            for(int i = 0; i < _maxUsers; i++)
+            for(int i = 0; i < _configuration.DepthCameraConfiguration.MaxUsers; i++)
             {
                 foreach(KeyValuePair<string, DataType> type in typeMap)
                 {
@@ -173,14 +165,19 @@ namespace SensorServer
                 }
             }
 
-            if (_lightSensor)
+            if (_configuration.LightSensor)
             {
                 SendDiscovery($"lightsensor/value", DataType.Float);
             }
 
-            if (_ultrasonicDistance)
+            if (_configuration.UltrasonicDistance)
             {
                 SendDiscovery($"ultrasonicdistance/value", DataType.Float);
+            }
+
+            if (_configuration.PIR)
+            {
+                SendDiscovery($"pir", DataType.Void);
             }
         }
 
@@ -215,11 +212,10 @@ namespace SensorServer
             };
             SendMessage(message);
         }
-
         public void SendDistance(float value)
         {
             DateTimeOffset now = DateTime.UtcNow;
-            ulong time = (ulong)now.ToUnixTimeSeconds();
+            ulong time = (ulong)now.ToUnixTimeMilliseconds();
             SensorDataMessage data = new SensorDataMessage()
             {
                 Path = $"ultrasonicdistance/value",
@@ -232,7 +228,22 @@ namespace SensorServer
             };
             SendMessage(message);
         }
-
+        public void SendPIRData()
+        {
+            DateTimeOffset now = DateTime.UtcNow;
+            ulong time = (ulong)now.ToUnixTimeMilliseconds();
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"pir",
+                Timestamp = time,
+                Void = new Google.Protobuf.WellKnownTypes.Empty()
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
+            };
+            SendMessage(message);
+        }
         public void Start()
         {
             while (!_finished)

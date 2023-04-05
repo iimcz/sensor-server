@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using SensorServer.Configuration;
 using SensorServer.DepthCamera;
 using SensorServer.LightSensor;
+using SensorServer.PIR;
 using SensorServer.ProjectorControl;
 using SensorServer.UltrasonicDistance;
 
@@ -16,6 +17,7 @@ namespace SensorServer
         private static ProtobufCommunication _protobufCommunication = null;
         private static LightSensorController _lightSensorController = null;
         private static UltrasonicDistanceController _ultrasonicDistanceController = null;
+        private static PIRController _pirController = null;
 
         private static bool _finished = false;
 
@@ -38,7 +40,7 @@ namespace SensorServer
 
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ConsoleEventHandler);
 
-            _protobufCommunication = new(config.CommunicationConfiguration.Host, config.CommunicationConfiguration.Port, config.DepthCameraConfiguration.MaxUsers, config.LightSensor, config.UltrasonicDistance);
+            _protobufCommunication = new(config);
 
             while (true)
             {
@@ -67,7 +69,7 @@ namespace SensorServer
                 Thread lightSensorThread = null;
                 if (config.LightSensor)
                 {
-                    _lightSensorController = new LightSensorController(_protobufCommunication);
+                    _lightSensorController = new LightSensorController(_protobufCommunication, config.LightSensorConfiguration);
                     lightSensorThread = new(_lightSensorController.Start);
                     lightSensorThread.Start();
                 }
@@ -75,9 +77,17 @@ namespace SensorServer
                 Thread ultrasonicDistanceThread = null;
                 if (config.UltrasonicDistance)
                 {
-                    _ultrasonicDistanceController = new UltrasonicDistanceController(_protobufCommunication, config.UltrasonicDistancePin);
+                    _ultrasonicDistanceController = new UltrasonicDistanceController(_protobufCommunication, config.UltrasonicDistanceConfiguration);
                     ultrasonicDistanceThread = new(_ultrasonicDistanceController.Start);
                     ultrasonicDistanceThread.Start();
+                }
+
+                Thread pirThread = null;
+                if (config.PIR)
+                {
+                    _pirController = new PIRController(_protobufCommunication, config.PIRConfiguration);
+                    pirThread = new(_pirController.Start);
+                    pirThread.Start();
                 }
 
                 if (config.DepthCamera)
@@ -109,6 +119,7 @@ namespace SensorServer
                 if (readThread != null) readThread.Join();
                 if (lightSensorThread != null) lightSensorThread.Join();
                 if (ultrasonicDistanceThread != null) ultrasonicDistanceThread.Join();
+                if (pirThread != null) pirThread.Join();
             }
         }
 
@@ -136,6 +147,11 @@ namespace SensorServer
                 {
                     _ultrasonicDistanceController.Stop();
                     _ultrasonicDistanceController.Dispose();
+                }
+                if(_pirController != null)
+                {
+                    _pirController.Stop();
+                    _pirController.Dispose();
                 }
             }
         }

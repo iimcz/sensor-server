@@ -14,14 +14,28 @@
         "MaxUsers": 0
     },
     "ProjectorControl": 0,
-    "DepthCamera": true,
+    "DepthCamera": false,
     "PjlinkConfiguration": {
         "Hosts": [
             "127.0.0.1"
         ]
     },
     "LightSensor": false,
+    "LightSensorConfiguration": {
+        "LightSensonPin": 0,
+        "ReadInterval": 500
+    },
     "UltrasonicDistance": false,
-    "UltrasonicDistancePin": 10
+    "UltrasonicDistanceConfiguration": {
+        "UltrasonicDistancePin": 5,
+        "ReadInterval": 100,
+        "Timeout1": 100000,
+        "Timeout2": 10000000
+    },
+    "PIR": false,
+    "PIRConfiguration": {
+        "PIRPin": 6,
+        "ReadInterval": 100
+    }
 }
   
