@@ -36,6 +36,7 @@
     "PIRConfiguration": {
         "PIRPin": 6,
         "ReadInterval": 100
-    }
+    },
+    "Microphones": false
 }
   

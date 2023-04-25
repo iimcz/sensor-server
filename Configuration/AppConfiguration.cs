@@ -22,6 +22,7 @@ namespace SensorServer.Configuration
         public UltrasonicDistanceConfiguration UltrasonicDistanceConfiguration { get; set; }
         public bool PIR { get; set; } = false;
         public PIRConfiguration PIRConfiguration { get; set; }
+        public bool Microphones { get; set; } = false;
 
         public AppConfiguration()
         {

@@ -179,6 +179,12 @@ namespace SensorServer
             {
                 SendDiscovery($"pir", DataType.Void);
             }
+
+            if (_configuration.Microphones)
+            {
+                SendDiscovery($"microphone/0", DataType.Float);
+                SendDiscovery($"microphone/1", DataType.Float);
+            }
         }
 
         private void SendDiscovery(string path, DataType dataType)
@@ -237,6 +243,22 @@ namespace SensorServer
                 Path = $"pir",
                 Timestamp = time,
                 Void = new Google.Protobuf.WellKnownTypes.Empty()
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
+            };
+            SendMessage(message);
+        }
+        public void SendMicrophonePeak(float peak, int index)
+        {
+            DateTimeOffset now = DateTime.UtcNow;
+            ulong time = (ulong)now.ToUnixTimeMilliseconds();
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"microphone/{index}",
+                Timestamp = time,
+                Float = peak
             };
             SensorMessage message = new SensorMessage()
             {

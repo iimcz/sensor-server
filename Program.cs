@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using SensorServer.Configuration;
 using SensorServer.DepthCamera;
 using SensorServer.LightSensor;
+using SensorServer.Microphone;
 using SensorServer.PIR;
 using SensorServer.ProjectorControl;
 using SensorServer.UltrasonicDistance;
@@ -18,6 +19,7 @@ namespace SensorServer
         private static LightSensorController _lightSensorController = null;
         private static UltrasonicDistanceController _ultrasonicDistanceController = null;
         private static PIRController _pirController = null;
+        private static MicrophoneController _microphoneController = null;
 
         private static bool _finished = false;
 
@@ -90,6 +92,14 @@ namespace SensorServer
                     pirThread.Start();
                 }
 
+                Thread microphoneThread = null;
+                if (config.Microphones)
+                {
+                    _microphoneController = new MicrophoneController(_protobufCommunication);
+                    microphoneThread = new(_microphoneController.Start);
+                    microphoneThread.Start();
+                }
+
                 if (config.DepthCamera)
                 {
                     _cameraController = new(_protobufCommunication, config.DepthCameraConfiguration);
@@ -120,6 +130,7 @@ namespace SensorServer
                 if (lightSensorThread != null) lightSensorThread.Join();
                 if (ultrasonicDistanceThread != null) ultrasonicDistanceThread.Join();
                 if (pirThread != null) pirThread.Join();
+                if (microphoneThread != null) microphoneThread.Join();
             }
         }
 
@@ -152,6 +163,10 @@ namespace SensorServer
                 {
                     _pirController.Stop();
                     _pirController.Dispose();
+                }
+                if(_microphoneController != null)
+                {
+                    _microphoneController.Stop();
                 }
             }
         }
