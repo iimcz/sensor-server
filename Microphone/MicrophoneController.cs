@@ -101,7 +101,6 @@ namespace SensorServer.Microphone
                 {
                     lock (locks[i])
                     {
-                        Console.Write($"{peaks[i]} ");
                         _dataSender.SendMicrophonePeak(peaks[i], i);
                     }
                 }

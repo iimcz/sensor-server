@@ -11,6 +11,7 @@ namespace SensorServer.PIR
         private readonly PIRConfiguration _configuration;
 
         private bool _finished = false;
+        private PinValue _lastValue = PinValue.Low;
 
         private GpioController _controller;
         public PIRController(ProtobufCommunication DataSender, PIRConfiguration configuration)
@@ -26,11 +27,18 @@ namespace SensorServer.PIR
         }
         public void Start()
         {
+            PinValue value;
             while (!_finished)
             {
-                if(_controller.Read(_configuration.PIRPin) == PinValue.High)
+                value = _controller.Read(_configuration.PIRPin);
+                if (value == PinValue.High && _lastValue == PinValue.Low)
                 {
+                    _lastValue = PinValue.High;
                     _dataSender.SendPIRData();
+                }
+                else if (value == PinValue.Low) 
+                {
+                    _lastValue = PinValue.Low;
                 }
                 Thread.Sleep(_configuration.ReadInterval);
             }
