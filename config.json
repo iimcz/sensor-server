@@ -11,7 +11,8 @@
         "JointMinConfidence": 0.75,
         "HorizontalGridSize": 0.1,
         "VerticalGridSize": 0.14,
-        "MaxUsers": 0
+        "MaxUsers": 0,
+        "SendSkeletonData": false
     },
     "ProjectorControl": 0,
     "DepthCamera": false,

@@ -13,7 +13,7 @@ namespace SensorServer.DepthCamera
         private readonly ProtobufCommunication _dataSender;
         private readonly GestureDetector _gestureDetector;
         private readonly SkeletonTracker _skeletonTracker;
-        private readonly float _minConfidence;
+        private readonly DepthCameraConfiguration _depthCameraConfiguration;
         
         /// <summary>
         /// Setup depth camera
@@ -22,7 +22,7 @@ namespace SensorServer.DepthCamera
         /// <param name="config">Cammera configuration</param>
         public CameraController(ProtobufCommunication DataSender, DepthCameraConfiguration config)
         {
-            _minConfidence = config.JointMinConfidence;
+            _depthCameraConfiguration = config;
             _dataSender = DataSender;
             _gestureDetector = new GestureDetector(config);
 
@@ -127,7 +127,7 @@ namespace SensorServer.DepthCamera
                 leftHandContent.X = leftHand.Proj.X;
                 leftHandContent.Y = leftHand.Proj.Y;
 
-                if(rightHand.Confidence >= _minConfidence){
+                if(rightHand.Confidence >= _depthCameraConfiguration.JointMinConfidence){
                     _dataSender.SendHandMovement(skeleton.ID, skeletonData.Timestamp, HandSide.Right, rightHandContent);
                     gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Right, rightHandContent, out gesture);
 
@@ -137,13 +137,23 @@ namespace SensorServer.DepthCamera
                     }
                 }
 
-                if(leftHand.Confidence >= _minConfidence){
+                if(leftHand.Confidence >= _depthCameraConfiguration.JointMinConfidence){
                     _dataSender.SendHandMovement(skeleton.ID, skeletonData.Timestamp, HandSide.Left, leftHandContent);
                     gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Left, leftHandContent, out gesture);
                     
                     if(gestureDetected)
                     {
                         _dataSender.SendGestureData(skeleton.ID, skeletonData.Timestamp, gesture, HandSide.Left);
+                    }
+                }
+
+                if (_depthCameraConfiguration.SendSkeletonData)
+                {
+                    foreach (Joint joint in skeleton.Joints)
+                    {
+                        _dataSender.SendJointRealPosition(skeleton.ID, skeletonData.Timestamp, joint);
+                        _dataSender.SendJointNormalizedPosition(skeleton.ID, skeletonData.Timestamp, joint);
+                        _dataSender.SendJointConfidence(skeleton.ID, skeletonData.Timestamp, joint.Type, joint.Confidence);
                     }
                 }
             }

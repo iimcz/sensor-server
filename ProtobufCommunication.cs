@@ -146,22 +146,38 @@ namespace SensorServer
 
         private void SendAllDiscovery()
         {
-            Dictionary<string, DataType> typeMap = new Dictionary<string, DataType>()
+            if (_configuration.DepthCamera)
             {
-                {"/center_position", DataType.Vector3 },
-
-                {"/gestures/swipe_left", DataType.Void },
-                {"/gestures/swipe_right", DataType.Void },
-                {"/gestures/swipe_up", DataType.Void },
-                {"/gestures/swipe_down", DataType.Void }
-            };
-
-            for(int i = 0; i < _configuration.DepthCameraConfiguration.MaxUsers; i++)
-            {
-                foreach(KeyValuePair<string, DataType> type in typeMap)
+                Dictionary<string, DataType> typeMap = new Dictionary<string, DataType>()
                 {
-                    SendDiscovery($"nuitrack/handtracking/user/{i}/hand/left" + type.Key, type.Value);
-                    SendDiscovery($"nuitrack/handtracking/user/{i}/hand/right" + type.Key, type.Value);
+                    {"/center_position", DataType.Vector3 },
+
+                    {"/gestures/swipe_left", DataType.Void },
+                    {"/gestures/swipe_right", DataType.Void },
+                    {"/gestures/swipe_up", DataType.Void },
+                    {"/gestures/swipe_down", DataType.Void }
+                };
+
+                for (int i = 0; i < _configuration.DepthCameraConfiguration.MaxUsers; i++)
+                {
+                    foreach (KeyValuePair<string, DataType> type in typeMap)
+                    {
+                        SendDiscovery($"nuitrack/handtracking/user/{i}/hand/left" + type.Key, type.Value);
+                        SendDiscovery($"nuitrack/handtracking/user/{i}/hand/right" + type.Key, type.Value);
+                    }
+                }
+            }
+
+            if (_configuration.DepthCamera && _configuration.DepthCameraConfiguration.SendSkeletonData)
+            {
+                for (int i = 0; i < _configuration.DepthCameraConfiguration.MaxUsers; i++)
+                {
+                    foreach (JointType jointType in Enum.GetValues(typeof(JointType)))
+                    {
+                        SendDiscovery($"nuitrack/skeleton/user/{i}/" + jointType.ToString().ToLower() + "/position/real", DataType.Vector3);
+                        SendDiscovery($"nuitrack/skeleton/user/{i}/" + jointType.ToString().ToLower() + "/position/normalized", DataType.Vector3);
+                        SendDiscovery($"nuitrack/skeleton/user/{i}/" + jointType.ToString().ToLower() + "/confidence", DataType.Float);
+                    }
                 }
             }
 
@@ -199,6 +215,62 @@ namespace SensorServer
             SensorMessage message = new SensorMessage()
             {
                 Descriptor_ = descriptor
+            };
+            SendMessage(message);
+        }
+        public void SendJointRealPosition(int id, ulong timestamp, Joint joint)
+        {
+            Vector3Data vector = new Vector3Data()
+            {
+                X = joint.Real.X,
+                Y = joint.Real.Y,
+                Z = joint.Real.Z
+            };
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"nuitrack/skeleton/user/{id}/" + joint.Type.ToString().ToLower() + "/position/real",
+                Timestamp = timestamp,
+                Vector3 = vector
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
+            };
+            SendMessage(message);
+
+            
+        }
+        public void SendJointNormalizedPosition(int id, ulong timestamp, Joint joint)
+        {
+            Vector3Data vector = new Vector3Data()
+            {
+                X = joint.Proj.X,
+                Y = joint.Proj.Y,
+                Z = joint.Proj.Z
+            };
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"nuitrack/skeleton/user/{id}/" + joint.Type.ToString().ToLower() + "/position/normalized",
+                Timestamp = timestamp,
+                Vector3 = vector
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
+            };
+            SendMessage(message);
+        }
+        public void SendJointConfidence(int id, ulong timestamp, JointType jointType, float confidence)
+        {
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"nuitrack/skeleton/user/{id}/" + jointType.ToString().ToLower() + "/confidence",
+                Timestamp = timestamp,
+                Float = confidence
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
             };
             SendMessage(message);
         }

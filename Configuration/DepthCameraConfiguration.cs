@@ -10,5 +10,6 @@ namespace SensorServer.Configuration
         public float HorizontalGridSize { get; set; } = 0.1f; 
         public float VerticalGridSize { get; set; } = 0.1f;
         public int MaxUsers { get; set; } = 6;
+        public bool SendSkeletonData { get; set; } = false;
     }
 }
