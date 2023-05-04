@@ -177,7 +177,7 @@ namespace SensorServer
 
             if (_configuration.PIR)
             {
-                SendDiscovery($"pir/presence", DataType.Void);
+                SendDiscovery($"pir/presence", DataType.Bool);
             }
 
             if (_configuration.Microphones)
@@ -234,7 +234,7 @@ namespace SensorServer
             };
             SendMessage(message);
         }
-        public void SendPIRData()
+        public void SendPIRData(bool value)
         {
             DateTimeOffset now = DateTime.UtcNow;
             ulong time = (ulong)now.ToUnixTimeMilliseconds();
@@ -242,7 +242,7 @@ namespace SensorServer
             {
                 Path = $"pir/presence",
                 Timestamp = time,
-                Void = new Google.Protobuf.WellKnownTypes.Empty()
+                Bool = value
             };
             SensorMessage message = new SensorMessage()
             {

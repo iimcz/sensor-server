@@ -34,11 +34,12 @@ namespace SensorServer.PIR
                 if (value == PinValue.High && _lastValue == PinValue.Low)
                 {
                     _lastValue = PinValue.High;
-                    _dataSender.SendPIRData();
+                    _dataSender.SendPIRData(true);
                 }
-                else if (value == PinValue.Low) 
+                else if (value == PinValue.Low && _lastValue == PinValue.High) 
                 {
                     _lastValue = PinValue.Low;
+                    _dataSender.SendPIRData(false);
                 }
                 Thread.Sleep(_configuration.ReadInterval);
             }
