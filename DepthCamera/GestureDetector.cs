@@ -8,7 +8,7 @@ namespace SensorServer.DepthCamera
     /// <summary>
     /// Handle gesture detection
     /// </summary>
-    class GestureDetector
+    class GestureDetector : IGestureDetector
     {
         private readonly int _gestureDelay;
         private readonly int _gestureLength;

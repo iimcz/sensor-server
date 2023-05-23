@@ -11,7 +11,7 @@ namespace SensorServer.DepthCamera
     {
         private bool _finished = false;
         private readonly ProtobufCommunication _dataSender;
-        private readonly GestureDetector _gestureDetector;
+        private readonly IGestureDetector _gestureDetector;
         private readonly SkeletonTracker _skeletonTracker;
         private readonly DepthCameraConfiguration _depthCameraConfiguration;
         
