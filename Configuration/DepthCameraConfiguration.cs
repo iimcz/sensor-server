@@ -11,5 +11,7 @@ namespace SensorServer.Configuration
         public float VerticalGridSize { get; set; } = 0.1f;
         public int MaxUsers { get; set; } = 6;
         public bool SendSkeletonData { get; set; } = false;
+        public int BestUserChangeDelay { get; set; } = 1000; //In ms
+        public int MinConfidenceDifference { get; set; } = 1;
     }
 }

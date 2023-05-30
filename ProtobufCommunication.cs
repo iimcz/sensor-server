@@ -166,6 +166,8 @@ namespace SensorServer
                         SendDiscovery($"nuitrack/handtracking/user/{i}/hand/right" + type.Key, type.Value);
                     }
                 }
+
+                SendDiscovery($"nuitrack/bestuser/id", DataType.Integer);
             }
 
             if (_configuration.DepthCamera && _configuration.DepthCameraConfiguration.SendSkeletonData)
@@ -202,7 +204,6 @@ namespace SensorServer
                 SendDiscovery($"microphone/1/peak", DataType.Float);
             }
         }
-
         private void SendDiscovery(string path, DataType dataType)
         {
             SensorDescriptor descriptor = new SensorDescriptor()
@@ -215,6 +216,22 @@ namespace SensorServer
             SensorMessage message = new SensorMessage()
             {
                 Descriptor_ = descriptor
+            };
+            SendMessage(message);
+        }
+        public void SendBestUserId(int id)
+        {
+            DateTimeOffset now = DateTime.UtcNow;
+            ulong time = (ulong)now.ToUnixTimeSeconds();
+            SensorDataMessage data = new SensorDataMessage()
+            {
+                Path = $"nuitrack/bestuser/id",
+                Timestamp = time,
+                Integer = id
+            };
+            SensorMessage message = new SensorMessage()
+            {
+                Data = data
             };
             SendMessage(message);
         }

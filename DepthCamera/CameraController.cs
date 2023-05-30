@@ -14,6 +14,10 @@ namespace SensorServer.DepthCamera
         private readonly IGestureDetector _gestureDetector;
         private readonly SkeletonTracker _skeletonTracker;
         private readonly DepthCameraConfiguration _depthCameraConfiguration;
+
+        private int _bestUserId = 0;
+        private int _bestUserConfidence = 0;
+        private DateTimeOffset _bestUserLastChanged;
         
         /// <summary>
         /// Setup depth camera
@@ -25,6 +29,7 @@ namespace SensorServer.DepthCamera
             _depthCameraConfiguration = config;
             _dataSender = DataSender;
             _gestureDetector = new GestureDetector(config);
+            _bestUserLastChanged = DateTime.UtcNow;
 
             try
             {
@@ -116,7 +121,20 @@ namespace SensorServer.DepthCamera
             bool gestureDetected = false;
             Gesture gesture = new Gesture();
 
-            foreach(Skeleton skeleton in skeletonData.Skeletons){
+            int[] conficence = new int[7];
+
+            foreach(Skeleton skeleton in skeletonData.Skeletons)
+            {
+                int currentConfidence = 0;
+                foreach(Joint joint in skeleton.Joints)
+                {
+                    if(joint.Confidence >= _depthCameraConfiguration.JointMinConfidence)
+                    {
+                        currentConfidence++;
+                    }
+                }
+                conficence[skeleton.ID] = currentConfidence;
+
                 Joint rightHand = skeleton.GetJoint(JointType.RightWrist);
                 HandContent rightHandContent = new();
                 rightHandContent.X = rightHand.Proj.X;
@@ -154,6 +172,37 @@ namespace SensorServer.DepthCamera
                         _dataSender.SendJointRealPosition(skeleton.ID, skeletonData.Timestamp, joint);
                         _dataSender.SendJointNormalizedPosition(skeleton.ID, skeletonData.Timestamp, joint);
                         _dataSender.SendJointConfidence(skeleton.ID, skeletonData.Timestamp, joint.Type, joint.Confidence);
+                    }
+                }
+
+                int currentMax = 0;
+                int index = 0;
+                for(int i = 1; i < 7; i++)
+                {
+                    if(conficence[i] > currentMax)
+                    {
+                        currentMax = conficence[i];
+                        index = i;
+                    }
+                }
+
+                if(currentMax - _bestUserConfidence > _depthCameraConfiguration.MinConfidenceDifference)
+                {
+                    if(_bestUserId == index)
+                    {
+                        _bestUserConfidence = currentMax;
+                    }
+                    else
+                    {
+                        DateTimeOffset now = DateTime.Now;
+                        TimeSpan duration = now - _bestUserLastChanged;
+                        if(duration.TotalMilliseconds > _depthCameraConfiguration.BestUserChangeDelay)
+                        {
+                            _bestUserConfidence = currentMax;
+                            _bestUserId = index;
+                            _bestUserLastChanged = now;
+                            _dataSender.SendBestUserId(index);
+                        }
                     }
                 }
             }
