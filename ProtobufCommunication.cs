@@ -68,7 +68,7 @@ namespace SensorServer
                 Void = new Google.Protobuf.WellKnownTypes.Empty()
             };
 
-            string path = $"nuitrack/handtracking/user/0/hand/{handSide.ToString().ToLower()}/gestures"; //Max one user with id 0
+            string path = $"nuitrack/handtracking/user/{Id}/hand/{handSide.ToString().ToLower()}/gestures"; //Max one user with id 0
             switch (type)
             {
                 case GestureType.GestureSwipeLeft:
@@ -115,7 +115,7 @@ namespace SensorServer
 
             SensorDataMessage data = new SensorDataMessage()
             {
-                Path = $"nuitrack/handtracking/user/0/hand/{handSide.ToString().ToLower()}/center_position", //Max one user with id 0
+                Path = $"nuitrack/handtracking/user/{userId}/hand/{handSide.ToString().ToLower()}/center_position", //Max one user with id 0
                 Timestamp = timestamp,
                 Vector3 = vector
             };
