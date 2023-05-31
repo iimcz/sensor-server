@@ -42,7 +42,7 @@
 
 			_i2cDevice.WriteRead(writeBuffer, readBuffer);
 			byte deviceId = readBuffer[0];
-			Debug.WriteLine($"GroveBaseHatRPI DeviceId 0x{deviceId:X}");
+			Console.WriteLine($"GroveBaseHatRPI DeviceId 0x{deviceId:X}");
 			if (deviceId != DeviceId)
 			{
 				throw new ApplicationException("GroveBaseHatRPI not found");
@@ -57,7 +57,7 @@
 			_i2cDevice.WriteRead(writeBuffer, readBuffer);
 			byte version = readBuffer[0];
 
-			Debug.WriteLine($"GroveBaseHatRPI version 0x{version:X}");
+			Console.WriteLine($"GroveBaseHatRPI version 0x{version:X}");
 
 			return version;
 		}
@@ -70,7 +70,7 @@
 			_i2cDevice.WriteRead(writeBuffer, readBuffer);
 			ushort value = BitConverter.ToUInt16(readBuffer, 0);
 
-			Debug.WriteLine($"GroveBaseHatRPI PowerSupplyVoltage MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
+			Console.WriteLine($"GroveBaseHatRPI PowerSupplyVoltage MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
 
 			return value / 1000.0;
 		}
@@ -85,7 +85,7 @@
 			_i2cDevice.WriteRead(writeBuffer, readBuffer);
 			ushort value = BitConverter.ToUInt16(readBuffer, 0);
 
-			Debug.WriteLine($"GroveBaseHatRPI ReadRaw {analogPort} MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
+			Console.WriteLine($"GroveBaseHatRPI ReadRaw {analogPort} MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
 
 			return value;
 		}
@@ -100,7 +100,7 @@
 			_i2cDevice.WriteRead(writeBuffer, readBuffer);
 			ushort value = BitConverter.ToUInt16(readBuffer, 0);
 
-			Debug.WriteLine($"GroveBaseHatRPI ReadVoltage {analogPort} MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
+			Console.WriteLine($"GroveBaseHatRPI ReadVoltage {analogPort} MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
 
 			return value / 1000.0;
 		}
@@ -115,7 +115,7 @@
 			_i2cDevice.WriteRead(writeBuffer, readBuffer);
 			ushort value = BitConverter.ToUInt16(readBuffer, 0);
 
-			Debug.WriteLine($"GroveBaseHatRPI Read {analogPort} MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
+			Console.WriteLine($"GroveBaseHatRPI Read {analogPort} MSB 0x{readBuffer[1]:X} LSB 0x{readBuffer[0]:X} Value {value}");
 
 			return value / 10.0;
 		}
