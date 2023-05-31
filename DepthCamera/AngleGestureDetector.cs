@@ -1,5 +1,6 @@
 ﻿using nuitrack;
 using System;
+using System.Collections.Generic;
 
 namespace SensorServer.DepthCamera
 {
@@ -8,26 +9,35 @@ namespace SensorServer.DepthCamera
         private HandContent _lastPosition;
         private double _minGestureDistance = 0.2;
         private int _minGestureDelay = 1000; //ms
+        private Queue<HandContent> _queue;
         private DateTimeOffset _lastGesture;
         public AngleGestureDetector()
         {
             _lastGesture = DateTime.Now;
+            _queue = new();
         }
         public bool Update(int userId, CameraController.HandSide handType, HandContent handContent, out Gesture outGesture)
         {
             Gesture gesture = new Gesture();
             gesture.UserID = userId;
+            if(_queue.Count < 30)
+            {
+                _queue.Enqueue(handContent);
+                outGesture = gesture;
+                return false;
+            }
             DateTimeOffset now = DateTime.Now;
             TimeSpan duration = now - _lastGesture;
             if (duration.TotalMilliseconds > _minGestureDelay)
             {
+                _queue.Enqueue(handContent);
+                _lastPosition = _queue.Dequeue();
                 double distance = GetDistance(handContent);
                 if (distance > _minGestureDistance)
                 {
                     double angle = RadianToDegree(GetAngle(handContent));
                     if (angle >= -45 && angle < 45)
                     {
-                        Console.WriteLine("Swipe right");
                         _lastGesture = now;
                         gesture.Type = GestureType.GestureSwipeRight;
                         outGesture = gesture;
@@ -35,7 +45,6 @@ namespace SensorServer.DepthCamera
                     }
                     else if (angle >= 45 && angle < 135)
                     {
-                        Console.WriteLine("Swipe up");
                         _lastGesture = now;
                         gesture.Type = GestureType.GestureSwipeUp;
                         outGesture = gesture;
@@ -43,7 +52,6 @@ namespace SensorServer.DepthCamera
                     }
                     else if (angle >= 135 || angle < -135)
                     {
-                        Console.WriteLine("Swipe left");
                         _lastGesture = now;
                         gesture.Type = GestureType.GestureSwipeLeft;
                         outGesture = gesture;
@@ -51,7 +59,6 @@ namespace SensorServer.DepthCamera
                     }
                     else if (angle >= -135 && angle < -45)
                     {
-                        Console.WriteLine("Swipe down");
                         _lastGesture = now;
                         gesture.Type = GestureType.GestureSwipeDown;
                         outGesture = gesture;
@@ -59,7 +66,11 @@ namespace SensorServer.DepthCamera
                     }
                 }
             }
-            _lastPosition = handContent;
+            else
+            {
+                _queue.Dequeue();
+                _queue.Enqueue(handContent);
+            }
 
             outGesture = gesture;
             return false;
