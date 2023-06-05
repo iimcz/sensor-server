@@ -13,5 +13,8 @@ namespace SensorServer.Configuration
         public bool SendSkeletonData { get; set; } = false;
         public int BestUserChangeDelay { get; set; } = 1000; //In ms
         public int MinConfidenceDifference { get; set; } = 1;
+        public int HandPositionQueueLength { get; set; } = 30;
+        public double HorizontalGestureLength { get; set; } = 0.2;
+        public double VerticalGestureLength { get; set; } = 0.4;
     }
 }

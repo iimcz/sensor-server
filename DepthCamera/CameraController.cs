@@ -29,7 +29,7 @@ namespace SensorServer.DepthCamera
             _depthCameraConfiguration = config;
             _dataSender = DataSender;
             //_gestureDetector = new GestureDetector(config);
-            _gestureDetector = new AngleGestureDetector();
+            _gestureDetector = new AngleGestureDetector(config);
             _bestUserLastChanged = DateTime.UtcNow;
 
             try

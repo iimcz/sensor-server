@@ -14,7 +14,10 @@
         "MaxUsers": 0,
         "SendSkeletonData": false,
         "BestUserChangeDelay": 1000,
-        "MinConfidenceDifference": 1
+        "MinConfidenceDifference": 1,
+        "HandPositionQueueLength": 30,
+        "HorizontalGestureLength": 0.2,
+        "VerticalGestureLength": 0.4
     },
     "ProjectorControl": 0,
     "DepthCamera": false,
