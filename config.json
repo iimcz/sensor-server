@@ -17,7 +17,9 @@
         "MinConfidenceDifference": 1,
         "HandPositionQueueLength": 30,
         "HorizontalGestureLength": 0.2,
-        "VerticalGestureLength": 0.4
+        "VerticalGestureLength": 0.4,
+        "DeadZone": 10,
+        "UserMovement": 0.1
     },
     "ProjectorControl": 0,
     "DepthCamera": false,

@@ -9,8 +9,6 @@ namespace SensorServer.DepthCamera
     {
         private readonly DepthCameraConfiguration _config;
         private Dictionary<int, AngleGestureDetectorUser> _usersHands;
-        private int _deadZone = 10;
-        private double _userMovement = 0.1;
         public AngleGestureDetector(DepthCameraConfiguration config)
         {
             _config = config;
@@ -69,7 +67,7 @@ namespace SensorServer.DepthCamera
             if (duration.TotalMilliseconds > _config.GestureDelay)
             {
                 double distance = GetDistance(handContent, lastPosition);
-                if (GetJointDistance(torso, lastTorso) > _userMovement)
+                if (GetJointDistance(torso, lastTorso) > _config.UserMovement)
                 {
                     outGesture = gesture;
                     return false;
@@ -77,14 +75,14 @@ namespace SensorServer.DepthCamera
                 if (distance > _config.HorizontalGestureLength)
                 {
                     double angle = RadianToDegree(GetAngle(handContent, lastPosition));
-                    if (angle >= -45 + _deadZone && angle < 45 - _deadZone)
+                    if (angle >= -45 + _config.DeadZone && angle < 45 - _config.DeadZone)
                     {
                         user.LastGesture = now;
                         gesture.Type = GestureType.GestureSwipeRight;
                         outGesture = gesture;
                         return true;
                     }
-                    else if (angle >= 45 + _deadZone && angle < 135 - _deadZone)
+                    else if (angle >= 45 + _config.DeadZone && angle < 135 - _config.DeadZone)
                     {
                         if(distance > _config.VerticalGestureLength)
                         {
@@ -100,14 +98,14 @@ namespace SensorServer.DepthCamera
                         }
                         
                     }
-                    else if (angle >= 135 + _deadZone || angle < -135 - _deadZone)
+                    else if (angle >= 135 + _config.DeadZone || angle < -135 - _config.DeadZone)
                     {
                         user.LastGesture = now;
                         gesture.Type = GestureType.GestureSwipeLeft;
                         outGesture = gesture;
                         return true;
                     }
-                    else if (angle >= -135 + _deadZone && angle < -45 - _deadZone)
+                    else if (angle >= -135 + _config.DeadZone && angle < -45 - _config.DeadZone)
                     {
                         if (distance > _config.VerticalGestureLength)
                         {

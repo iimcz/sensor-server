@@ -16,5 +16,7 @@ namespace SensorServer.Configuration
         public int HandPositionQueueLength { get; set; } = 30;
         public double HorizontalGestureLength { get; set; } = 0.2;
         public double VerticalGestureLength { get; set; } = 0.4;
+        public int DeadZone { get; set; } = 10;
+        public double UserMovement { get; set; } = 0.1;
     }
 }
