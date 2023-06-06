@@ -31,7 +31,7 @@ namespace SensorServer.DepthCamera
         /// <param name="handContent">Information abou new hand position</param>
         /// <param name="outGesture">Output paremeter will contain geture type if gesture is detected</param>
         /// <returns>True if gesture was detected, False otherwise</returns>
-        public bool Update(int userId, DepthCamera.CameraController.HandSide handType, HandContent handContent, out Gesture outGesture)
+        public bool Update(int userId, DepthCamera.CameraController.HandSide handType, HandContent handContent, Joint torso, out Gesture outGesture)
         {
             Hand hand = new Hand(handContent.X, handContent.Y, _config.HorizontalGridSize, _config.VerticalGridSize);
             GestureType gestureType;

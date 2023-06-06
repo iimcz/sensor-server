@@ -146,9 +146,11 @@ namespace SensorServer.DepthCamera
                 leftHandContent.X = leftHand.Proj.X;
                 leftHandContent.Y = leftHand.Proj.Y;
 
+                Joint torso = skeleton.GetJoint(JointType.Torso);
+
                 if(rightHand.Confidence >= _depthCameraConfiguration.JointMinConfidence){
                     _dataSender.SendHandMovement(skeleton.ID, skeletonData.Timestamp, HandSide.Right, rightHandContent);
-                    gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Right, rightHandContent, out gesture);
+                    gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Right, rightHandContent, torso, out gesture);
 
                     if(gestureDetected)
                     {
@@ -158,7 +160,7 @@ namespace SensorServer.DepthCamera
 
                 if(leftHand.Confidence >= _depthCameraConfiguration.JointMinConfidence){
                     _dataSender.SendHandMovement(skeleton.ID, skeletonData.Timestamp, HandSide.Left, leftHandContent);
-                    gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Left, leftHandContent, out gesture);
+                    gestureDetected = _gestureDetector.Update(skeleton.ID, HandSide.Left, leftHandContent, torso, out gesture);
                     
                     if(gestureDetected)
                     {
