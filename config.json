@@ -4,7 +4,7 @@
         "Port": 8915
     },
     "DepthCameraConfiguration": {
-        "BackgroundMode": "static_first_frame",
+        "BackgroundMode": "StaticFirstFrame",
         "CalibrationFramesNumber": 30,
         "GestureDelay": 1000,
         "JointMinConfidence": 0.75,

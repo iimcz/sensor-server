@@ -37,7 +37,8 @@ namespace SensorServer
             }
             catch
             {
-                Console.WriteLine("Config file not found");
+                Console.WriteLine("Config file not found, writing our default.");
+                File.WriteAllText("config.json", JsonConvert.SerializeObject(config, Formatting.Indented));
             }
 
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ConsoleEventHandler);

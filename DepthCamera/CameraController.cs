@@ -35,11 +35,11 @@ namespace SensorServer.DepthCamera
             try
             {
                 Nuitrack.Init();
-                if (config.BackgroundMode == "dynamic")
+                if (config.BackgroundMode == BackgroundModeType.Dynamic)
                 {
                     Nuitrack.SetConfigValue("Segmentation.Background.BackgroundMode", "dynamic");
                 }
-                else
+                else if (config.BackgroundMode == BackgroundModeType.StaticFirstFrame)
                 {
                     Nuitrack.SetConfigValue("Segmentation.Background.BackgroundMode", "static_first_frame");
                     Nuitrack.SetConfigValue("Segmentation.Background.CalibrationFramesNumber", config.CalibrationFramesNumber.ToString());
