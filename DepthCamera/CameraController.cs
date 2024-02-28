@@ -12,6 +12,7 @@ namespace SensorServer.DepthCamera
         private bool _finished = false;
         private readonly ProtobufCommunication _dataSender;
         private readonly IGestureDetector _gestureDetector;
+        private readonly ISkeletonFilter _skeletonFilter;
         private readonly SkeletonTracker _skeletonTracker;
         private readonly DepthCameraConfiguration _depthCameraConfiguration;
 
@@ -29,7 +30,18 @@ namespace SensorServer.DepthCamera
             _depthCameraConfiguration = config;
             _dataSender = DataSender;
             //_gestureDetector = new GestureDetector(config);
-            _gestureDetector = new AngleGestureDetector(config);
+            _gestureDetector = config.GestureDetector switch
+            {
+                GestureDetector.None => new NoGestureDetector(),
+                GestureDetector.AngleGestureDetector => new AngleGestureDetector(config.AngleGestureDetector),
+                _ => throw new NotImplementedException(),
+            };
+            _skeletonFilter = config.SkeletonFilter switch
+            {
+                SkeletonFilter.None => new NoSkeletonFilter(),
+                SkeletonFilter.ConeSkeletonFilter => new ConeSkeletonFilter(config.ConeSkeletonFilter),
+                _ => throw new NotImplementedException(),
+            };
             _bestUserLastChanged = DateTime.UtcNow;
 
             try
@@ -126,6 +138,9 @@ namespace SensorServer.DepthCamera
 
             foreach(Skeleton skeleton in skeletonData.Skeletons)
             {
+                if (_skeletonFilter.ShouldDiscardSkeleton(skeleton))
+                    continue;
+
                 int currentConfidence = 0;
                 foreach(Joint joint in skeleton.Joints)
                 {

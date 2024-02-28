@@ -1,47 +1,45 @@
 {
-    "CommunicationConfiguration": {
-        "Host": "192.168.22.65",
-        "Port": 8915
+  "CommunicationConfiguration": {
+    "Host": "localhost",
+    "Port": 5000,
+    "ManagementPort": 5001
+  },
+  "DepthCameraConfiguration": {
+    "BackgroundMode": 0,
+    "GestureDetector": 1,
+    "SkeletonFilter": 1,
+    "CalibrationFramesNumber": 20,
+    "JointMinConfidence": 0.75,
+    "MaxUsers": 6,
+    "SendSkeletonData": false,
+    "BestUserChangeDelay": 1000,
+    "MinConfidenceDifference": 1,
+    "AngleGestureDetector": {
+      "GestureDelay": 1000,
+      "HandPositionQueueLength": 30,
+      "HorizontalGestureLength": 0.2,
+      "VerticalGestureLength": 0.4,
+      "DeadZone": 10,
+      "UserMovement": 0.1
     },
-    "DepthCameraConfiguration": {
-        "BackgroundMode": "StaticFirstFrame",
-        "CalibrationFramesNumber": 30,
-        "GestureDelay": 1000,
-        "JointMinConfidence": 0.75,
-        "MaxUsers": 0,
-        "SendSkeletonData": false,
-        "BestUserChangeDelay": 1000,
-        "MinConfidenceDifference": 1,
-        "HandPositionQueueLength": 30,
-        "HorizontalGestureLength": 0.2,
-        "VerticalGestureLength": 0.4,
-        "DeadZone": 10,
-        "UserMovement": 0.1
-    },
-    "ProjectorControl": 0,
-    "DepthCamera": false,
-    "PjlinkConfiguration": {
-        "Hosts": [
-            "127.0.0.1"
-        ]
-    },
-    "LightSensor": false,
-    "LightSensorConfiguration": {
-        "LightSensonPin": 0,
-        "ReadInterval": 500
-    },
-    "UltrasonicDistance": false,
-    "UltrasonicDistanceConfiguration": {
-        "UltrasonicDistancePin": 5,
-        "ReadInterval": 100,
-        "Timeout1": 100000,
-        "Timeout2": 10000000
-    },
-    "PIR": false,
-    "PIRConfiguration": {
-        "PIRPin": 6,
-        "ReadInterval": 100
-    },
-    "Microphones": false
+    "ConeSkeletonFilter": {
+      "MaximumDistance": 500.0,
+      "MinimumDistance": 100.0,
+      "ConeAngle": 45.0
+    }
+  },
+  "ProjectorControl": 0,
+  "PjlinkConfiguration": {
+    "Hosts": []
+  },
+  "DepthCamera": false,
+  "UdpCrestronAdapterConfiguration": null,
+  "ShellIpwServiceConfiguration": null,
+  "LightSensor": false,
+  "LightSensorConfiguration": null,
+  "UltrasonicDistance": false,
+  "UltrasonicDistanceConfiguration": null,
+  "PIR": false,
+  "PIRConfiguration": null,
+  "Microphones": false
 }
-  

@@ -7,9 +7,9 @@ namespace SensorServer.DepthCamera
 {
     class AngleGestureDetector : IGestureDetector
     {
-        private readonly DepthCameraConfiguration _config;
+        private readonly AngleGestureDetectorConfiguration _config;
         private Dictionary<int, AngleGestureDetectorUser> _usersHands;
-        public AngleGestureDetector(DepthCameraConfiguration config)
+        public AngleGestureDetector(AngleGestureDetectorConfiguration config)
         {
             _config = config;
             _usersHands = new();
